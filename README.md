@@ -1,38 +1,22 @@
-# Z3_Bediak
+# Moj TODO List
 
-This template should help get you started developing with Vue 3 in Vite.
+Meno: Romina Bediak
 
-## Recommended IDE Setup
+Krúžok: pondelok 11:00
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## O projekte
 
-## Recommended Browser Setup
+Webová aplikácia slúži na správu osobných úloh (TODO list). Používateľovi umožňuje vytvárať nové úlohy, prezerať ich zoznam a označovať dokončené úlohy. Cieľom projektu je vytvoriť jednoduché a prehľadné používateľské rozhranie na organizáciu každodenných povinností.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+Aplikácia je vytvorená pomocou frameworku Vue 3, ktorý zabezpečuje reaktívne zobrazovanie a aktualizáciu údajov. Na tvorbu používateľského rozhrania sa využíva knižnica Vuetify, ktorá poskytuje hotové komponenty založené na Material Design.
 
-## Customize configuration
+## Použité technológie
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- **Vue 3** – JavaScript framework na tvorbu používateľského rozhrania.
+- **Vite** – nástroj na vývoj a zostavovanie aplikácie.
+- **Vuetify** – knižnica používateľských komponentov založená na Material Design.
+- **Material Design Icons** – knižnica ikon.
 
-## Project Setup
+## Použitie AI
 
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+Pri tvorbe webovej aplikácie som použila AI nástroje na konzultáciu riešení, vysvetlenie technológií, riešenie technických problémov a kontrolu implementácie. Výsledný kód som upravovala a implementovala podľa požiadaviek zadania.
