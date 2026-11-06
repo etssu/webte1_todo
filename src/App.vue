@@ -10,9 +10,25 @@
     
     <v-main>
       <v-container>
-        <v-btn color="primary">
-          Hello Vuetify!
-        </v-btn>
+        <v-row>
+          <v-col>
+            <v-card text="" title="">
+              
+            </v-card>
+          </v-col>
+          <v-col>
+            <v-card text="" title="">
+              
+            </v-card>
+            
+          </v-col>
+          <v-col>
+            <v-card text="" title="">
+              
+            </v-card>
+            
+          </v-col>
+        </v-row>
       </v-container>
     </v-main>
   </v-app>
