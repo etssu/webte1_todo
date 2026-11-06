@@ -1,0 +1,43 @@
+@font-face {
+    font-family: PlayfairDisplay;
+    src: url(../fonts/PlayfairDisplay-VariableFont_wght.woff2);
+}
+
+@font-face {
+    font-family: PlayfairDisplay;
+    src: url(../fonts/PlayfairDisplay-Italic-VariableFont_wght.woff2);
+    font-style:italic;
+}
+
+@font-face {
+    font-family: Nunito;
+    src: url(../fonts/Nunito-Regular.woff2);
+    font-weight: 400;
+}
+@font-face {
+    font-family: Nunito;
+    src: url(../fonts/Nunito-Medium.woff2);
+    font-weight: 500;
+}
+@font-face {
+    font-family: Nunito;
+    src: url(../fonts/Nunito-Bold.woff2);
+    font-weight: 700;
+}
+@font-face {
+    font-family: Nunito;
+    src: url(../fonts/Nunito-BoldItalic.woff2);
+    font-weight: 700;
+    font-style: italic;
+}
+@font-face {
+    font-family: Nunito;
+    src: url(../fonts/Nunito-Italic.woff2);
+    font-style: italic;
+}
+
+.app-bar-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 32px;
+}
