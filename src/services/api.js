@@ -12,6 +12,7 @@ async function handleResponse(response) {
         throw new Error(`API error: ${response.status}`);
     }
 
+    // no content
     if (response.status === 204) {
         return null;
     }
@@ -85,7 +86,7 @@ export async function markDone(name, todo_id){
 }
 
 // PATCH - mark undone
-export async function markUndode(name, todo_id) {
+export async function markUndone(name, todo_id) {
     const response = await fetch(`${getUrl(name)}/${todo_id}/undone`, {
         method: "PATCH"
     });
