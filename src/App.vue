@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { getTasks, addTask, markDone, markUndone, updateTask, deleteTask} from './services/api.js';
+import { getTasks, addTask, markDone, markUndone, updateTask, deleteTask, resetTasks} from './services/api.js';
 
 // store tasks
 const tasks = ref([]);
@@ -31,6 +31,14 @@ const deletingTaskId = ref(null);
 const isLoading = ref(false);
 const isSaving = ref(false);
 const isDeleting = ref(false);
+
+// Success message
+const showSuccess = ref(false);
+const successMessage = ref('');
+
+// Reset tasks dialog
+const showResetDialog = ref(false);
+const isResetting = ref(false);
 
 
 async function loadTasks() {
@@ -87,6 +95,7 @@ async function saveTask() {
     const success = await createTask(task);
 
     if (!success) return;
+    notifySuccess('Task added successfully!');
 
     title.value = '';
     description.value = '';
@@ -126,6 +135,7 @@ async function completeTask(taskId) {
     try {
         await markDone(studentName.value.trim(), taskId);
         await loadTasks();
+        notifySuccess('Task completed successfully!');
     } catch (error) {
         errorMessage.value = 'Failed to complete task.';
         console.error(error);
@@ -138,6 +148,7 @@ async function restoreTask(taskId, newStatus) {
     await loadTasks();
 
     taskStatuses.value[taskId] = newStatus;
+    notifySuccess('Task restored successfully!');
   } catch (error) {
     errorMessage.value = 'Failed to restore task.';
     console.error(error);
@@ -178,6 +189,7 @@ async function saveEditedTask() {
     );
 
     await loadTasks();
+    notifySuccess('Task updated successfully!');
     showEditDialog.value = false;
     editingTaskId.value = null;
   } catch (error) {
@@ -200,6 +212,7 @@ async function confirmDeleteTask() {
     await deleteTask(studentName.value.trim(), deletingTaskId.value);
     await loadTasks();
 
+    notifySuccess('Task deleted successfully!');
     showDeleteDialog.value = false;
     deletingTaskId.value = null;
   } catch (error) {
@@ -208,6 +221,32 @@ async function confirmDeleteTask() {
   } finally {
     isDeleting.value = false;
   }
+}
+
+async function confirmResetTasks() {
+  isResetting.value = true;
+
+  try {
+    await resetTasks(studentName.value.trim());
+    await loadTasks();
+
+    // Clear locally saved task statuses
+    taskStatuses.value = {};
+
+    showResetDialog.value = false;
+    notifySuccess('Tasks reset successfully!');
+  } catch (error) {
+    errorMessage.value = 'Failed to reset tasks.';
+    console.error(error);
+  } finally {
+    isResetting.value = false;
+  }
+}
+
+
+function notifySuccess(message) {
+  successMessage.value = message;
+  showSuccess.value = true;
 }
 
 const titleRules = [
@@ -245,6 +284,10 @@ const inProgressTasks = computed(() => {
 const finishedTasks = computed(() => {
   return tasks.value.filter((task) => task.is_finished);
 });
+
+function isOverdue(task) {
+  return !task.is_finished && new Date(task.date_to) < new Date();
+}
 </script>
 
 <template>
@@ -289,6 +332,15 @@ const finishedTasks = computed(() => {
             <v-icon start>mdi-plus</v-icon>
             Add task
           </v-btn>
+
+          <v-btn
+            color="error"
+            variant="outlined"
+            @click="showResetDialog = true"
+          >
+            <v-icon start>mdi-refresh</v-icon>
+            Reset tasks
+          </v-btn>
         </v-row>
 
         <v-row class="mt-6" align="start">
@@ -317,7 +369,10 @@ const finishedTasks = computed(() => {
                   <v-card-text>
                     {{ task.description }}
 
-                    <div class="text-caption mt-3">
+                    <div
+                      class="text-caption mt-3"
+                      :class="{ 'text-error font-weight-bold': isOverdue(task) }"
+                    >
                       <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
                       Deadline: {{ new Date(task.date_to).toLocaleString() }}
                     </div>
@@ -388,7 +443,10 @@ const finishedTasks = computed(() => {
                   <v-card-text>
                     {{ task.description }}
 
-                    <div class="text-caption mt-3">
+                    <div
+                      class="text-caption mt-3"
+                      :class="{ 'text-error font-weight-bold': isOverdue(task) }"
+                    >
                       <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
                       Deadline: {{ new Date(task.date_to).toLocaleString() }}
                     </div>
@@ -460,7 +518,10 @@ const finishedTasks = computed(() => {
                   <v-card-text>
                     {{ task.description }}
 
-                    <div class="text-caption mt-3">
+                    <div
+                      class="text-caption mt-3"
+                      :class="{ 'text-error font-weight-bold': isOverdue(task) }"
+                    >
                       <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
                       Deadline: {{ new Date(task.date_to).toLocaleString() }}
                     </div>
@@ -657,6 +718,57 @@ const finishedTasks = computed(() => {
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="showResetDialog" max-width="450">
+    <v-card rounded="lg">
+      <v-card-title class="text-h5 font-weight-bold">
+        Reset tasks?
+      </v-card-title>
+
+      <v-card-text>
+        Are you sure you want to reset your tasks to the initial sample data?
+        <span class="text-error font-weight-bold">
+          All your current tasks will be deleted.
+        </span>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer />
+
+        <v-btn
+          variant="text"
+          @click="showResetDialog = false"
+        >
+          Cancel
+        </v-btn>
+
+        <v-btn
+          color="error"
+          variant="flat"
+          :loading="isResetting"
+          :disabled="isResetting"
+          @click="confirmResetTasks"
+        >
+          Reset
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+      <v-snackbar
+        v-model="showSuccess"
+        :timeout="3000"
+        color="success"
+        location="top"
+      >
+        {{ successMessage }}
+
+        <template #actions>
+          <v-btn variant="text" @click="showSuccess = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
   </v-app>
 </template>
 
