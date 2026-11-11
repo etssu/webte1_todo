@@ -42,71 +42,83 @@ const isResetting = ref(false);
 
 
 async function loadTasks() {
-  isLoading.value = true;
+    isLoading.value = true;
+    errorMessage.value = '';
 
-  try {
-    const response = await getTasks(studentName.value);
-    tasks.value = response.todos;
+    try {
+        const response = await getTasks(studentName.value.trim());
 
-    const savedStatuses = localStorage.getItem(
-      getStatusKey(studentName.value.trim())
-    );
+        tasks.value = response.todos;
 
-    taskStatuses.value = savedStatuses
-      ? JSON.parse(savedStatuses)
-      : {};
-  } catch (error) {
-    errorMessage.value = 'Failed to load tasks.';
-    console.error(error);
-  } finally {
-    isLoading.value = false;
-  }
+        // Load locally saved task statuses
+        const savedStatuses = localStorage.getItem(
+            `taskStatuses_${studentName.value.trim()}`
+        );
+
+        taskStatuses.value = savedStatuses
+            ? JSON.parse(savedStatuses)
+            : {};
+
+    } catch (error) {
+        errorMessage.value = 'Failed to load tasks.';
+        console.error('Failed to load tasks:', error);
+
+        throw error;
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 async function createTask(task) {
-  try {
-    await addTask(studentName.value, task);
+    try {
+        await addTask(studentName.value.trim(), task);
+    } catch (error) {
+        errorMessage.value = 'Failed to add task.';
+        console.error('Failed to add task:', error);
+        return false;
+    }
 
-    await loadTasks();
+    try {
+        await loadTasks();
+    } catch (error) {
+        console.error('Task was created, but the list could not be refreshed:', error);
+    }
+
     return true;
-  } catch (error) {
-    errorMessage.value = 'Failed to add task. Please try again.';
-    console.error(error);
-    return false;
-  }
 }
 
 async function saveTask() {
-  const { valid } = await addForm.value.validate();
+    const { valid } = await addForm.value.validate();
 
-  if (!valid) return;
+    if (!valid) return;
 
-  const task = {
-    title: title.value,
-    description: description.value,
-    date_from: dateFrom.value,
-    date_to: dateTo.value,
-    is_finished: false,
-  };
+    isSaving.value = true;
+    errorMessage.value = '';
 
-  isSaving.value = true;
+    const task = {
+        title: title.value.trim(),
+        description: description.value.trim(),
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+        is_finished: false
+    };
 
-  try {
-    const success = await createTask(task);
+    try {
+        const success = await createTask(task);
 
-    if (!success) return;
-    notifySuccess('Task added successfully!');
+        if (!success) return;
 
-    title.value = '';
-    description.value = '';
-    dateFrom.value = '';
-    dateTo.value = '';
+        notifySuccess('Task added successfully!');
 
-    showAddDialog.value = false;
-    addForm.value.resetValidation();
-  } finally {
-    isSaving.value = false;
-  }
+        title.value = '';
+        description.value = '';
+        dateFrom.value = '';
+        dateTo.value = '';
+
+        showAddDialog.value = false;
+    } finally {
+        isSaving.value = false;
+    }
 }
 
 // Get storage key for a specific student
@@ -132,27 +144,46 @@ function changeTaskStatus(taskId, newStatus) {
 }
 
 async function completeTask(taskId) {
+    errorMessage.value = '';
+
     try {
         await markDone(studentName.value.trim(), taskId);
-        await loadTasks();
+
         notifySuccess('Task completed successfully!');
     } catch (error) {
         errorMessage.value = 'Failed to complete task.';
-        console.error(error);
+        console.error('Failed to complete task:', error);
+        return;
+    }
+
+    try {
+        await loadTasks();
+    } catch (error) {
+        console.error('Task completed, but failed to refresh the list:', error);
     }
 }
 
 async function restoreTask(taskId, newStatus) {
-  try {
-    await markUndone(studentName.value.trim(), taskId);
-    await loadTasks();
+    errorMessage.value = '';
 
-    taskStatuses.value[taskId] = newStatus;
-    notifySuccess('Task restored successfully!');
-  } catch (error) {
-    errorMessage.value = 'Failed to restore task.';
-    console.error(error);
-  }
+    try {
+        await markUndone(studentName.value.trim(), taskId);
+
+        taskStatuses.value[taskId] = newStatus;
+
+        notifySuccess('Task restored successfully!');
+    } catch (error) {
+        errorMessage.value = 'Failed to restore task.';
+        console.error('Failed to restore task:', error);
+        return;
+    }
+
+    try {
+        await loadTasks();
+        taskStatuses.value[taskId] = newStatus;
+    } catch (error) {
+        console.error('Task restored, but failed to refresh the list:', error);
+    }
 }
 
 function openEditDialog(task) {
@@ -168,36 +199,42 @@ function openEditDialog(task) {
 }
 
 async function saveEditedTask() {
-  const { valid } = await editForm.value.validate();
-  if (!valid) return;
+    const { valid } = await editForm.value.validate();
 
-  const updatedTask = {
-    title: title.value,
-    description: description.value,
-    date_from: dateFrom.value,
-    date_to: dateTo.value,
-    is_finished: editIsFinished.value,
-  };
+    if (!valid) return;
 
-  isSaving.value = true;
+    isSaving.value = true;
+    errorMessage.value = '';
 
-  try {
-    await updateTask(
-      studentName.value.trim(),
-      editingTaskId.value,
-      updatedTask
-    );
+    const updatedTask = {
+        title: title.value.trim(),
+        description: description.value.trim(),
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+        is_finished: editIsFinished.value
+    };
 
-    await loadTasks();
-    notifySuccess('Task updated successfully!');
-    showEditDialog.value = false;
-    editingTaskId.value = null;
-  } catch (error) {
-    errorMessage.value = 'Failed to update task.';
-    console.error(error);
-  } finally {
-    isSaving.value = false;
-  }
+    try {
+        await updateTask(
+            studentName.value.trim(),
+            editingTaskId.value,
+            updatedTask
+        );
+
+        showEditDialog.value = false;
+        notifySuccess('Task updated successfully!');
+
+        try {
+            await loadTasks();
+        } catch (error) {
+            console.error('Task updated, but failed to refresh the list:', error);
+        }
+    } catch (error) {
+        errorMessage.value = 'Failed to update task.';
+        console.error('Failed to update task:', error);
+    } finally {
+        isSaving.value = false;
+    }
 }
 
 function openDeleteDialog(task) {
@@ -205,44 +242,59 @@ function openDeleteDialog(task) {
   showDeleteDialog.value = true;
 }
 
-async function confirmDeleteTask() {
-  isDeleting.value = true;
-
-  try {
-    await deleteTask(studentName.value.trim(), deletingTaskId.value);
-    await loadTasks();
-
-    notifySuccess('Task deleted successfully!');
-    showDeleteDialog.value = false;
-    deletingTaskId.value = null;
-  } catch (error) {
-    errorMessage.value = 'Failed to delete task.';
-    console.error(error);
-  } finally {
-    isDeleting.value = false;
-  }
-}
-
 async function confirmResetTasks() {
-  isResetting.value = true;
+    isResetting.value = true;
+    errorMessage.value = '';
 
-  try {
-    await resetTasks(studentName.value.trim());
-    await loadTasks();
+    try {
+        await resetTasks(studentName.value.trim());
+    } catch (error) {
+        errorMessage.value = 'Failed to reset tasks.';
+        console.error('Failed to reset tasks:', error);
+        isResetting.value = false;
+        return;
+    }
 
-    // Clear locally saved task statuses
+    localStorage.removeItem(getStatusKey(studentName.value));
     taskStatuses.value = {};
 
     showResetDialog.value = false;
     notifySuccess('Tasks reset successfully!');
-  } catch (error) {
-    errorMessage.value = 'Failed to reset tasks.';
-    console.error(error);
-  } finally {
-    isResetting.value = false;
-  }
+
+    try {
+        await loadTasks();
+    } catch (error) {
+        console.error('Tasks reset, but failed to refresh the list:', error);
+    } finally {
+        isResetting.value = false;
+    }
 }
 
+async function confirmDeleteTask() {
+    isDeleting.value = true;
+    errorMessage.value = '';
+
+    try {
+        await deleteTask(
+            studentName.value.trim(),
+            deletingTaskId.value
+        );
+
+        showDeleteDialog.value = false;
+        notifySuccess('Task deleted successfully!');
+
+        try {
+            await loadTasks();
+        } catch (error) {
+            console.error('Task deleted, but failed to refresh the list:', error);
+        }
+    } catch (error) {
+        errorMessage.value = 'Failed to delete task.';
+        console.error('Failed to delete task:', error);
+    } finally {
+        isDeleting.value = false;
+    }
+}
 
 function notifySuccess(message) {
   successMessage.value = message;
@@ -285,9 +337,6 @@ const finishedTasks = computed(() => {
   return tasks.value.filter((task) => task.is_finished);
 });
 
-function isOverdue(task) {
-  return !task.is_finished && new Date(task.date_to) < new Date();
-}
 </script>
 
 <template>
@@ -369,10 +418,7 @@ function isOverdue(task) {
                   <v-card-text>
                     {{ task.description }}
 
-                    <div
-                      class="text-caption mt-3"
-                      :class="{ 'text-error font-weight-bold': isOverdue(task) }"
-                    >
+                    <div class="text-caption mt-3">
                       <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
                       Deadline: {{ new Date(task.date_to).toLocaleString() }}
                     </div>
@@ -443,10 +489,7 @@ function isOverdue(task) {
                   <v-card-text>
                     {{ task.description }}
 
-                    <div
-                      class="text-caption mt-3"
-                      :class="{ 'text-error font-weight-bold': isOverdue(task) }"
-                    >
+                    <div class="text-caption mt-3">
                       <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
                       Deadline: {{ new Date(task.date_to).toLocaleString() }}
                     </div>
@@ -519,9 +562,7 @@ function isOverdue(task) {
                     {{ task.description }}
 
                     <div
-                      class="text-caption mt-3"
-                      :class="{ 'text-error font-weight-bold': isOverdue(task) }"
-                    >
+                      class="text-caption mt-3">
                       <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
                       Deadline: {{ new Date(task.date_to).toLocaleString() }}
                     </div>

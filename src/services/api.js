@@ -3,7 +3,7 @@ const API_URL = "https://wt1zadanie.iolab.sk/api/";
 
 // build URL for a specific student
 function getUrl(name) {
-    return API_URL + encodeURIComponent(name);
+  return API_URL + encodeURIComponent(name.trim());
 }
 
 // handle API response
