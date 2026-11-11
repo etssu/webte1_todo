@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { ref, watch, computed} from 'vue';
   import { getTasks, addTask } from './services/api.js';
 
   // store tasks
@@ -11,10 +11,12 @@
   const showAddDialog = ref(false);
 
   // New task fields
+  const addForm = ref(null);
   const title = ref('');
   const description = ref('');
   const dateFrom = ref('');
   const dateTo = ref('');
+  const status = ref('todo');
 
   async function loadTasks() {
     errorMessage.value = '';
@@ -25,7 +27,10 @@
     }
 
     try {
-        tasks.value = await getTasks(studentName.value);
+        const response = await getTasks(studentName.value);
+
+        tasks.value = response.todos;
+        console.log('First task:', response.todos[0]);
     } catch (error) {
         errorMessage.value = 'Failed to load tasks. Please try again.';
         console.error(error);
@@ -35,6 +40,7 @@
   async function createTask(task) {
     try {
         await addTask(studentName.value, task);
+      
         await loadTasks();
         return true;
     } catch (error) {
@@ -45,24 +51,82 @@
   }
 
   async function saveTask() {
+    const { valid } = await addForm.value.validate();
+
+    if (!valid) return;
+
     const task = {
         title: title.value,
         description: description.value,
         date_from: dateFrom.value,
         date_to: dateTo.value,
-        is_finished: false
+        is_finished: false,
     };
 
-    await createTask(task);
+    const success = await createTask(task);
+
+    if (!success) return;
 
     // Clear form
     title.value = '';
     description.value = '';
     dateFrom.value = '';
     dateTo.value = '';
-
+    
     showAddDialog.value = false;
+    status.value = 'todo';
+    addForm.value.resetValidation();
   }
+
+  // Store additional task statuses
+  const taskStatuses = ref(
+      JSON.parse(localStorage.getItem('taskStatuses') || '{}')
+  );
+
+  // Save statuses whenever they change
+  watch(taskStatuses, (newStatuses) => {
+      localStorage.setItem('taskStatuses', JSON.stringify(newStatuses));
+  }, { deep: true });
+
+  const titleRules = [
+    value => !!value?.trim() || 'Title is required',
+    value => (value?.length ?? 0) <= 200 || 'Maximum 200 characters allowed'
+  ];
+
+  const descriptionRules = [
+    value => (value?.length ?? 0) <= 1000 || 'Maximum 1000 characters allowed'
+  ];
+
+  const dateFromRules = [
+    value => !!value || 'Start date is required'
+  ];
+
+  const dateToRules = [
+    value => !!value || 'End date is required',
+    value => {
+        if (!value || !dateFrom.value) return true;
+
+        return new Date(value) > new Date(dateFrom.value)
+            || 'End date must be after start date';
+    }
+  ];
+
+  const todoTasks = computed(() => {
+    return tasks.value.filter(task =>
+        !task.is_finished &&
+        (taskStatuses.value[task.id] || 'todo') === 'todo');
+  });
+
+  const inProgressTasks = computed(() => {
+    return tasks.value.filter(task =>
+      !task.is_finished &&
+      taskStatuses.value[task.id] === 'in_progress'
+    );
+  });
+
+  const finishedTasks = computed(() => {
+    return tasks.value.filter(task => task.is_finished);
+  });
 </script>
 
 <template>
@@ -119,7 +183,7 @@
               </v-card-subtitle>
 
               <v-card-text>
-                <div class="text-h4 font-weight-bold">0</div>
+                <div class="text-h4 font-weight-bold">{{ todoTasks.length }}</div>
                 <div class="text-caption">Tasks</div>
               </v-card-text>
             </v-card>
@@ -137,7 +201,7 @@
               </v-card-subtitle>
 
               <v-card-text>
-                <div class="text-h4 font-weight-bold">0</div>
+                <div class="text-h4 font-weight-bold">{{ inProgressTasks.length }}</div>
                 <div class="text-caption">Tasks</div>
               </v-card-text>
             </v-card>
@@ -155,7 +219,7 @@
               </v-card-subtitle>
 
               <v-card-text>
-                <div class="text-h4 font-weight-bold">0</div>
+                <div class="text-h4 font-weight-bold">{{ finishedTasks.length }}</div>
                 <div class="text-caption">Tasks</div>
               </v-card-text>
             </v-card>
@@ -171,30 +235,46 @@
         </v-card-title>
 
         <v-card-text>
-          <v-text-field
-            v-model="title"
-            label="Title"
-            placeholder="Enter task title"
-          />
+          <v-form ref="addForm">
+            <v-text-field
+              v-model="title"
+              label="Title"
+              placeholder="Enter task title"
+              :rules="titleRules"
+            />
 
-          <v-textarea
-            v-model="description"
-            label="Description"
-            placeholder="Enter task description"
-            rows="3"
-          />
+            <v-textarea
+              v-model="description"
+              label="Description"
+              placeholder="Enter task description"
+              rows="3"
+              :rules="descriptionRules"
+            />
 
-          <v-text-field
-            v-model="dateFrom"
-            label="Start date"
-            type="datetime-local"
-          />
+            <v-text-field
+              v-model="dateFrom"
+              label="Start date"
+              type="datetime-local"
+              :rules="dateFromRules"
+            />
 
-          <v-text-field
-            v-model="dateTo"
-            label="End date"
-            type="datetime-local"
-          />
+            <v-text-field
+              v-model="dateTo"
+              label="End date"
+              type="datetime-local"
+              :rules="dateToRules"
+            />
+
+            <v-select
+              v-model="status"
+              label="Status"
+              :items="[
+                { title: 'To Do', value: 'todo' },
+                { title: 'In Progress', value: 'in_progress' },
+                { title: 'Done', value: 'done' }
+              ]"
+            />
+          </v-form>
         </v-card-text>
 
         <v-card-actions>
