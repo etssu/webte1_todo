@@ -1,341 +1,56 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
-import { getTasks, addTask, markDone, markUndone, updateTask, deleteTask, resetTasks} from './services/api.js';
-
-// store tasks
-const tasks = ref([]);
-const studentName = ref('');
-const errorMessage = ref('');
-
-// Add task dialog
-const showAddDialog = ref(false);
-
-// Edit task dialog
-const showEditDialog = ref(false);
-const editingTaskId = ref(null);
-const editForm = ref(null);
-const editIsFinished = ref(false);
-
-// New task fields
-const addForm = ref(null);
-const title = ref('');
-const description = ref('');
-const dateFrom = ref('');
-const dateTo = ref('');
-
-// Delete task dialog
-const showDeleteDialog = ref(false);
-const deletingTaskId = ref(null);
-
-// Indicators
-const isLoading = ref(false);
-const isSaving = ref(false);
-const isDeleting = ref(false);
-
-// Success message
-const showSuccess = ref(false);
-const successMessage = ref('');
-
-// Reset tasks dialog
-const showResetDialog = ref(false);
-const isResetting = ref(false);
-
-
-async function loadTasks() {
-    isLoading.value = true;
-    errorMessage.value = '';
-
-    try {
-        const response = await getTasks(studentName.value.trim());
-
-        tasks.value = response.todos;
-
-        // Load locally saved task statuses
-        const savedStatuses = localStorage.getItem(
-            `taskStatuses_${studentName.value.trim()}`
-        );
-
-        taskStatuses.value = savedStatuses
-            ? JSON.parse(savedStatuses)
-            : {};
-
-    } catch (error) {
-        errorMessage.value = 'Failed to load tasks.';
-        console.error('Failed to load tasks:', error);
-
-        throw error;
-    } finally {
-        isLoading.value = false;
-    }
-}
-
-async function createTask(task) {
-    try {
-        await addTask(studentName.value.trim(), task);
-    } catch (error) {
-        errorMessage.value = 'Failed to add task.';
-        console.error('Failed to add task:', error);
-        return false;
-    }
-
-    try {
-        await loadTasks();
-    } catch (error) {
-        console.error('Task was created, but the list could not be refreshed:', error);
-    }
-
-    return true;
-}
-
-async function saveTask() {
-    const { valid } = await addForm.value.validate();
-
-    if (!valid) return;
-
-    isSaving.value = true;
-    errorMessage.value = '';
-
-    const task = {
-        title: title.value.trim(),
-        description: description.value.trim(),
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
-        is_finished: false
-    };
-
-    try {
-        const success = await createTask(task);
-
-        if (!success) return;
-
-        notifySuccess('Task added successfully!');
-
-        title.value = '';
-        description.value = '';
-        dateFrom.value = '';
-        dateTo.value = '';
-
-        showAddDialog.value = false;
-    } finally {
-        isSaving.value = false;
-    }
-}
-
-// Get storage key for a specific student
-function getStatusKey(studentName) {
-    return `taskStatuses_${studentName}`;
-}
-
-// Store additional task statuses
-const taskStatuses = ref({});
-
-// Save statuses whenever they change
-watch(taskStatuses, (newStatuses) => {
-    if (!studentName.value.trim()) return;
-
-    localStorage.setItem(
-        getStatusKey(studentName.value.trim()),
-        JSON.stringify(newStatuses)
-    );
-}, { deep: true });
-
-function changeTaskStatus(taskId, newStatus) {
-  taskStatuses.value[taskId] = newStatus;
-}
-
-async function completeTask(taskId) {
-    errorMessage.value = '';
-
-    try {
-        await markDone(studentName.value.trim(), taskId);
-
-        notifySuccess('Task completed successfully!');
-    } catch (error) {
-        errorMessage.value = 'Failed to complete task.';
-        console.error('Failed to complete task:', error);
-        return;
-    }
-
-    try {
-        await loadTasks();
-    } catch (error) {
-        console.error('Task completed, but failed to refresh the list:', error);
-    }
-}
-
-async function restoreTask(taskId, newStatus) {
-    errorMessage.value = '';
-
-    try {
-        await markUndone(studentName.value.trim(), taskId);
-
-        taskStatuses.value[taskId] = newStatus;
-
-        notifySuccess('Task restored successfully!');
-    } catch (error) {
-        errorMessage.value = 'Failed to restore task.';
-        console.error('Failed to restore task:', error);
-        return;
-    }
-
-    try {
-        await loadTasks();
-        taskStatuses.value[taskId] = newStatus;
-    } catch (error) {
-        console.error('Task restored, but failed to refresh the list:', error);
-    }
-}
-
-function openEditDialog(task) {
-  editingTaskId.value = task.id;
-
-  title.value = task.title;
-  description.value = task.description || '';
-  dateFrom.value = task.date_from;
-  dateTo.value = task.date_to;
-  editIsFinished.value = task.is_finished;
-
-  showEditDialog.value = true;
-}
-
-async function saveEditedTask() {
-    const { valid } = await editForm.value.validate();
-
-    if (!valid) return;
-
-    isSaving.value = true;
-    errorMessage.value = '';
-
-    const updatedTask = {
-        title: title.value.trim(),
-        description: description.value.trim(),
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
-        is_finished: editIsFinished.value
-    };
-
-    try {
-        await updateTask(
-            studentName.value.trim(),
-            editingTaskId.value,
-            updatedTask
-        );
-
-        showEditDialog.value = false;
-        notifySuccess('Task updated successfully!');
-
-        try {
-            await loadTasks();
-        } catch (error) {
-            console.error('Task updated, but failed to refresh the list:', error);
-        }
-    } catch (error) {
-        errorMessage.value = 'Failed to update task.';
-        console.error('Failed to update task:', error);
-    } finally {
-        isSaving.value = false;
-    }
-}
-
-function openDeleteDialog(task) {
-  deletingTaskId.value = task.id;
-  showDeleteDialog.value = true;
-}
-
-async function confirmResetTasks() {
-    isResetting.value = true;
-    errorMessage.value = '';
-
-    try {
-        await resetTasks(studentName.value.trim());
-    } catch (error) {
-        errorMessage.value = 'Failed to reset tasks.';
-        console.error('Failed to reset tasks:', error);
-        isResetting.value = false;
-        return;
-    }
-
-    localStorage.removeItem(getStatusKey(studentName.value));
-    taskStatuses.value = {};
-
-    showResetDialog.value = false;
-    notifySuccess('Tasks reset successfully!');
-
-    try {
-        await loadTasks();
-    } catch (error) {
-        console.error('Tasks reset, but failed to refresh the list:', error);
-    } finally {
-        isResetting.value = false;
-    }
-}
-
-async function confirmDeleteTask() {
-    isDeleting.value = true;
-    errorMessage.value = '';
-
-    try {
-        await deleteTask(
-            studentName.value.trim(),
-            deletingTaskId.value
-        );
-
-        showDeleteDialog.value = false;
-        notifySuccess('Task deleted successfully!');
-
-        try {
-            await loadTasks();
-        } catch (error) {
-            console.error('Task deleted, but failed to refresh the list:', error);
-        }
-    } catch (error) {
-        errorMessage.value = 'Failed to delete task.';
-        console.error('Failed to delete task:', error);
-    } finally {
-        isDeleting.value = false;
-    }
-}
-
-function notifySuccess(message) {
-  successMessage.value = message;
-  showSuccess.value = true;
-}
-
-const titleRules = [
-  (value) => !!value?.trim() || 'Title is required',
-  (value) => (value?.length ?? 0) <= 200 || 'Maximum 200 characters allowed',
-];
-
-const descriptionRules = [
-  (value) => (value?.length ?? 0) <= 1000 || 'Maximum 1000 characters allowed',
-];
-
-const dateFromRules = [(value) => !!value || 'Start date is required'];
-
-const dateToRules = [
-  (value) => !!value || 'End date is required',
-  (value) => {
-    if (!value || !dateFrom.value) return true;
-
-    return new Date(value) > new Date(dateFrom.value) || 'End date must be after start date';
-  },
-];
-
-const todoTasks = computed(() => {
-  return tasks.value.filter(
-    (task) => !task.is_finished && (taskStatuses.value[task.id] || 'todo') === 'todo'
-  );
-});
-
-const inProgressTasks = computed(() => {
-  return tasks.value.filter(
-    (task) => !task.is_finished && taskStatuses.value[task.id] === 'in_progress'
-  );
-});
-
-const finishedTasks = computed(() => {
-  return tasks.value.filter((task) => task.is_finished);
-});
+import { useTasks } from './composables/useTasks.js';
+
+const {
+  // store tasks
+    tasks,
+    studentName,
+    errorMessage,
+    taskStatuses,
+
+    // New task fields
+    title,
+    description,
+    dateFrom,
+    dateTo,
+
+    addForm,
+    editForm,
+
+    // dialogs
+    showAddDialog,
+    showEditDialog,
+    showDeleteDialog,
+    showResetDialog,
+
+    isLoading,
+    isSaving,
+    isDeleting,
+    isResetting,
+
+    showSuccess,
+    successMessage,
+
+    titleRules,
+    descriptionRules,
+    dateFromRules,
+    dateToRules,
+
+    todoTasks,
+    inProgressTasks,
+    finishedTasks,
+
+    loadTasks,
+    saveTask,
+    changeTaskStatus,
+    completeTask,
+    restoreTask,
+    openEditDialog,
+    saveEditedTask,
+    openDeleteDialog,
+    confirmDeleteTask,
+    confirmResetTasks
+} = useTasks();
 
 </script>
 
