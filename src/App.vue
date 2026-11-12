@@ -4,7 +4,6 @@ import TaskColumn from './components/TaskColumn.vue';
 
 const {
   // store tasks
-  tasks,
   studentName,
   errorMessage,
   taskStatuses,
@@ -244,7 +243,11 @@ const {
         <v-card-title>Delete task?</v-card-title>
 
         <v-card-text>
-          Are you sure you want to delete this task? This action cannot be undone.
+          Are you sure you want to delete this task?
+
+          <span class="text-error">
+              This action cannot be undone.
+          </span>
         </v-card-text>
 
         <v-card-actions>

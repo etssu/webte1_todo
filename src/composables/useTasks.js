@@ -212,13 +212,19 @@ async function restoreTask(taskId, newStatus) {
 
 
 // TASK EDITING
+function formatDateForInput(date) {
+    if (!date) return '';
+
+    return date.replace(' ', 'T').slice(0, 16);
+}
+
 function openEditDialog(task) {
     editingTaskId.value = task.id;
 
     title.value = task.title;
     description.value = task.description || '';
-    dateFrom.value = task.date_from;
-    dateTo.value = task.date_to;
+    dateFrom.value = formatDateForInput(task.date_from);
+    dateTo.value = formatDateForInput(task.date_to);
     editIsFinished.value = task.is_finished;
 
     showEditDialog.value = true;
@@ -268,7 +274,7 @@ async function saveEditedTask() {
     }
 }
 
-
+ы
 // TASK DELETION 
 function openDeleteDialog(task) {
     deletingTaskId.value = task.id;
