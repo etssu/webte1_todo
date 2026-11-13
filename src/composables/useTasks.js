@@ -88,8 +88,13 @@ function loadSavedStatuses() {
 
 // task loading
 async function loadTasks() {
-    isLoading.value = true;
+    if (!studentName.value.trim()) {
+        errorMessage.value = 'Student ID is required.';
+        return;
+    }
+
     errorMessage.value = '';
+    isLoading.value = true;
 
     try {
         const response = await getTasks(studentName.value.trim());
@@ -274,7 +279,6 @@ async function saveEditedTask() {
     }
 }
 
-ы
 // TASK DELETION 
 function openDeleteDialog(task) {
     deletingTaskId.value = task.id;

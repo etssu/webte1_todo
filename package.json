@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fullcalendar/vue3": "^7.1.5",
     "@mdi/font": "^7.4.47",
     "vue": "^3.5.42"
   },

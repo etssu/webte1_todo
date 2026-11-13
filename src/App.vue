@@ -1,9 +1,11 @@
 <script setup>
 import { useTasks } from './composables/useTasks.js';
 import TaskColumn from './components/TaskColumn.vue';
+import TodoCalendar from './components/TodoCalendar.vue'
 
 const {
   // store tasks
+  tasks,
   studentName,
   errorMessage,
   taskStatuses,
@@ -141,6 +143,10 @@ const {
             @delete="openDeleteDialog"
           />
         </v-row>
+      </v-container>
+
+      <v-container>
+        <TodoCalendar :tasks="tasks"/>
       </v-container>
     </v-main>
 
