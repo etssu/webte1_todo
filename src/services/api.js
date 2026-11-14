@@ -9,15 +9,22 @@ function getUrl(name) {
 // handle API response
 async function handleResponse(response) {
     if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const error = new Error(`HTTP error: ${response.status}`);
+        error.name = 'HttpError';
+        throw error;
     }
 
-    // no content
     if (response.status === 204) {
         return null;
     }
 
-    return await response.json();
+    try {
+        return await response.json();
+    } catch {
+        const error = new Error('Invalid server response');
+        error.name = 'InvalidResponseError';
+        throw error;
+    }
 }
 
 // GET - get all tasks

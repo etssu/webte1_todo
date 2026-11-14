@@ -51,6 +51,22 @@ const isResetting = ref(false);
 const showSuccess = ref(false);
 const successMessage = ref('');
 
+// ERRORS
+function getErrorMessage(error) {
+    if (error instanceof TypeError) {
+        return 'Network error. Unable to connect to the server.';
+    }
+
+    if (error.name === 'HttpError') {
+        return 'Server error. Unable to load or save data.';
+    }
+
+    if (error.name === 'InvalidResponseError') {
+        return 'Invalid response received from the server.';
+    }
+
+    return 'An unexpected error occurred. Please try again.';
+}
 
 // LOCAL STORAGE
 function getStatusKey(name) {
@@ -103,7 +119,7 @@ async function loadTasks() {
         taskStatuses.value = loadSavedStatuses();
 
     } catch (error) {
-        errorMessage.value = 'Failed to load tasks.';
+        errorMessage.value = getErrorMessage(error);
         console.error('Failed to load tasks:', error);
         throw error;
 
