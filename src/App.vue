@@ -53,6 +53,7 @@ const {
   openDeleteDialog,
   confirmDeleteTask,
   confirmResetTasks,
+  openAddDialogFromCalendar,
 } = useTasks();
 </script>
 
@@ -146,7 +147,9 @@ const {
       </v-container>
 
       <v-container>
-        <TodoCalendar :tasks="tasks"/>
+        <TodoCalendar :tasks="tasks" 
+          @create-task="openAddDialogFromCalendar" 
+          @edit-task="openEditDialog"/>
       </v-container>
     </v-main>
 

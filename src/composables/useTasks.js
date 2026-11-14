@@ -171,6 +171,22 @@ async function saveTask() {
     }
 }
 
+function openAddDialogFromCalendar(info) {
+  const formatDateTime = (date) => {
+    const pad = (value) => String(value).padStart(2, '0')
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  }
+
+  title.value = ''
+  description.value = ''
+
+  dateFrom.value = formatDateTime(info.start)
+  dateTo.value = formatDateTime(info.end)
+
+  showAddDialog.value = true
+}
+
 
 // TASK COMPLETION
 async function completeTask(taskId) {
@@ -220,7 +236,10 @@ async function restoreTask(taskId, newStatus) {
 function formatDateForInput(date) {
     if (!date) return '';
 
-    return date.replace(' ', 'T').slice(0, 16);
+    const localDate = new Date(date);
+    const pad = (value) => String(value).padStart(2, '0');
+
+    return `${localDate.getFullYear()}-${pad(localDate.getMonth() + 1)}-${pad(localDate.getDate())}T${pad(localDate.getHours())}:${pad(localDate.getMinutes())}`;
 }
 
 function openEditDialog(task) {
@@ -418,6 +437,7 @@ export function useTasks() {
         studentName,
         errorMessage,
         taskStatuses,
+        
 
         // Form fields
         title,
@@ -471,6 +491,7 @@ export function useTasks() {
         openDeleteDialog,
         confirmDeleteTask,
         confirmResetTasks,
+        openAddDialogFromCalendar,
         notifySuccess
     };
 }
