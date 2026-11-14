@@ -16,9 +16,11 @@ import {
 const tasks = ref([]);
 const studentName = ref('');
 const errorMessage = ref('');
+const searchQuery = ref('');
 
 // Task statuses
 const taskStatuses = ref({});
+const taskFilter = ref('all');
 
 // Form fields
 const title = ref('');
@@ -443,24 +445,38 @@ const dateToRules = [
 
 
 // COMPUTED TASK LISTS
-const todoTasks = computed(() => {
-    return tasks.value.filter(
-        (task) =>
-            !task.is_finished &&
-            (taskStatuses.value[task.id] || 'todo') === 'todo'
+const searchedTasks = computed(() => {
+    const query = (searchQuery.value || '').toLowerCase();
+
+    return tasks.value.filter(task =>
+        task.title.toLowerCase().includes(query)
     );
 });
 
-const inProgressTasks = computed(() => {
-    return tasks.value.filter(
-        (task) =>
-            !task.is_finished &&
-            taskStatuses.value[task.id] === 'in_progress'
-    );
-});
+const todoTasks = computed(() => searchedTasks.value.filter(
+    task => !task.is_finished &&
+        (taskStatuses.value[task.id] || 'todo') === 'todo'
+));
 
-const finishedTasks = computed(() => {
-    return tasks.value.filter((task) => task.is_finished);
+const inProgressTasks = computed(() => searchedTasks.value.filter(
+    task => !task.is_finished &&
+        taskStatuses.value[task.id] === 'in_progress'
+));
+
+const finishedTasks = computed(() => searchedTasks.value.filter(
+    task => task.is_finished
+));
+
+const filteredTasks = computed(() => {
+    if (taskFilter.value === 'todo') {
+        return tasks.value.filter(task => !task.is_finished);
+    }
+
+    if (taskFilter.value === 'done') {
+        return tasks.value.filter(task => task.is_finished);
+    }
+
+    return tasks.value;
 });
 
 
@@ -482,6 +498,11 @@ export function useTasks() {
         editIsFinished,
         addForm,
         editForm,
+
+        // Filters
+        searchQuery,
+        taskFilter,
+        filteredTasks,
 
         // Dialogs
         showAddDialog,

@@ -10,6 +10,7 @@ const {
   errorMessage,
   taskStatuses,
 
+
   // New task fields
   title,
   description,
@@ -19,6 +20,10 @@ const {
 
   addForm,
   editForm,
+
+  // Filters
+  searchQuery,
+  taskFilter,
 
   // dialogs
   showAddDialog,
@@ -66,6 +71,7 @@ const {
 
     <v-main>
       <v-row justify="center" align="center" class="mt-6">
+
         <v-col cols="12" md="5">
           <v-text-field v-model="studentName" label="Student ID" placeholder="Enter your ID" />
 
@@ -102,48 +108,110 @@ const {
           </v-btn>
         </v-row>
 
+        <v-row justify="center" class="mt-6">
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchQuery"
+              label="Search tasks"
+              placeholder="Enter task title"
+              prepend-inner-icon="mdi-magnify"
+              clearable
+              hide-details
+            />
+          </v-col>
+        </v-row>
+
+        <v-row justify="center" class="mt-6">
+          <v-btn-toggle
+            v-model="taskFilter"
+            color="secondary"
+            mandatory
+            rounded="lg"
+          >
+            <v-btn value="all">All</v-btn>
+            <v-btn value="todo">TODO</v-btn>
+            <v-btn value="done">Done</v-btn>
+          </v-btn-toggle>
+        </v-row>
+
         <v-row class="mt-6" align="start">
+          <template v-if="taskFilter === 'all'">
+              <!-- TODO -->
+            <TaskColumn
+              title="TODO"
+              subtitle="Tasks waiting to be started"
+              :tasks="todoTasks"
+              :task-statuses="taskStatuses"
+              color="#F7D1CD"
+              @change-status="changeTaskStatus"
+              @complete="completeTask"
+              @restore="restoreTask"
+              @edit="openEditDialog"
+              @delete="openDeleteDialog"
+            />
+
+            <!-- IN PROGRESS -->
+            <TaskColumn
+              title="IN PROGRESS"
+              subtitle="Tasks currently in progress"
+              :tasks="inProgressTasks"
+              :task-statuses="taskStatuses"
+              color="#E8C2CA"
+              @change-status="changeTaskStatus"
+              @complete="completeTask"
+              @restore="restoreTask"
+              @edit="openEditDialog"
+              @delete="openDeleteDialog"
+            />
+
+            <!-- DONE -->
+            <TaskColumn
+              title="DONE"
+              subtitle="Finished Tasks"
+              :tasks="finishedTasks"
+              :task-statuses="taskStatuses"
+              color="#D1B3C4"
+              @change-status="changeTaskStatus"
+              @complete="completeTask"
+              @restore="restoreTask"
+              @edit="openEditDialog"
+              @delete="openDeleteDialog"
+            />
+          </template>
+
           <!-- TODO -->
-          <TaskColumn
-            title="TODO"
-            subtitle="Tasks waiting to be started"
-            :tasks="todoTasks"
-            :task-statuses="taskStatuses"
-            color="#F7D1CD"
-            @change-status="changeTaskStatus"
-            @complete="completeTask"
-            @restore="restoreTask"
-            @edit="openEditDialog"
-            @delete="openDeleteDialog"
-          />
+          <template v-else-if="taskFilter === 'todo'">
+            <TaskColumn
+              full-width
+              title="TODO"
+              subtitle="All unfinished tasks"
+              :tasks="[...todoTasks, ...inProgressTasks]"
+              :task-statuses="taskStatuses"
+              color="#F7D1CD"
+              @change-status="changeTaskStatus"
+              @complete="completeTask"
+              @restore="restoreTask"
+              @edit="openEditDialog"
+              @delete="openDeleteDialog"
+            />
+          </template>
 
-          <!-- IN PROGRESS -->
-          <TaskColumn
-            title="IN PROGRESS"
-            subtitle="Tasks currently in progress"
-            :tasks="inProgressTasks"
-            :task-statuses="taskStatuses"
-            color="#E8C2CA"
-            @change-status="changeTaskStatus"
-            @complete="completeTask"
-            @restore="restoreTask"
-            @edit="openEditDialog"
-            @delete="openDeleteDialog"
-          />
-
-          <!-- DONE -->
-          <TaskColumn
-            title="DONE"
-            subtitle="Finished Tasks"
-            :tasks="finishedTasks"
-            :task-statuses="taskStatuses"
-            color="#D1B3C4"
-            @change-status="changeTaskStatus"
-            @complete="completeTask"
-            @restore="restoreTask"
-            @edit="openEditDialog"
-            @delete="openDeleteDialog"
-          />
+           <!-- DONE -->
+          <template v-else>
+            <TaskColumn
+              full-width
+              title="DONE"
+              subtitle="All completed tasks"
+              :tasks="finishedTasks"
+              :task-statuses="taskStatuses"
+              color="#D1B3C4"
+              @change-status="changeTaskStatus"
+              @complete="completeTask"
+              @restore="restoreTask"
+              @edit="openEditDialog"
+              @delete="openDeleteDialog"
+            />
+          </template>
         </v-row>
       </v-container>
 

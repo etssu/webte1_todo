@@ -1,4 +1,3 @@
-
 <script setup>
 defineProps({
   title: {
@@ -21,13 +20,18 @@ defineProps({
     type: String,
     required: true,
   },
+
+  fullWidth: {
+    type: Boolean,
+    default: false
+  },
 });
 
 defineEmits(['change-status', 'complete', 'restore', 'edit', 'delete']);
 </script>
 
 <template>
-  <v-col cols="12" md="4">
+  <v-col cols="12" :md="fullWidth ? 12 : 4">
     <v-card :color="color" rounded="lg" elevation="2">
       <v-card-title class="text-h6 font-weight-bold">
         {{ title }}
@@ -39,9 +43,8 @@ defineEmits(['change-status', 'complete', 'restore', 'edit', 'delete']);
 
       <v-card-text>
         <div class="text-h4 font-weight-bold">
-          {{ tasks.length }}
+          {{ tasks.length }} Tasks
         </div>
-        <div class="text-caption">Tasks</div>
 
         <v-card
           v-for="task in tasks"
