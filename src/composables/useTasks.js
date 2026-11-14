@@ -17,6 +17,7 @@ const tasks = ref([]);
 const studentName = ref('');
 const errorMessage = ref('');
 const searchQuery = ref('');
+const sortBy = ref('date_from');
 
 // Task statuses
 const taskStatuses = ref({});
@@ -453,6 +454,7 @@ const searchedTasks = computed(() => {
     );
 });
 
+
 const todoTasks = computed(() => searchedTasks.value.filter(
     task => !task.is_finished &&
         (taskStatuses.value[task.id] || 'todo') === 'todo'
@@ -467,18 +469,9 @@ const finishedTasks = computed(() => searchedTasks.value.filter(
     task => task.is_finished
 ));
 
-const filteredTasks = computed(() => {
-    if (taskFilter.value === 'todo') {
-        return tasks.value.filter(task => !task.is_finished);
-    }
-
-    if (taskFilter.value === 'done') {
-        return tasks.value.filter(task => task.is_finished);
-    }
-
-    return tasks.value;
-});
-
+const unfinishedTasks = computed(() =>
+    searchedTasks.value.filter(task => !task.is_finished)
+);
 
 // RETURN 
 export function useTasks() {
@@ -501,8 +494,8 @@ export function useTasks() {
 
         // Filters
         searchQuery,
+        sortBy,
         taskFilter,
-        filteredTasks,
 
         // Dialogs
         showAddDialog,
@@ -534,6 +527,7 @@ export function useTasks() {
         todoTasks,
         inProgressTasks,
         finishedTasks,
+        unfinishedTasks,
 
         // Functions
         loadTasks,

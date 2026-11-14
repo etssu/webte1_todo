@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   title: {
     type: String,
     required: true,
@@ -25,9 +27,35 @@ defineProps({
     type: Boolean,
     default: false
   },
+  sortBy: {
+    type: String,
+    required: true,
+  },
 });
 
 defineEmits(['change-status', 'complete', 'restore', 'edit', 'delete']);
+
+const sortedTasks = computed(() => {
+  return [...props.tasks].sort((a, b) =>
+    new Date(a[props.sortBy]) - new Date(b[props.sortBy])
+  );
+});
+
+function isOverdue(task) {
+    return !task.is_finished && new Date(task.date_to) < new Date();
+}
+
+const formatDate = (date) => {
+    if (!date) return '';
+
+    return new Date(date).toLocaleString('sk-SK', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
 </script>
 
 <template>
@@ -47,7 +75,7 @@ defineEmits(['change-status', 'complete', 'restore', 'edit', 'delete']);
         </div>
 
         <v-card
-          v-for="task in tasks"
+          v-for="task in sortedTasks"
           :key="task.id"
           class="mb-3"
           rounded="lg"
@@ -58,12 +86,12 @@ defineEmits(['change-status', 'complete', 'restore', 'edit', 'delete']);
           </v-card-title>
 
           <v-card-text>
-            {{ task.description }}
+              <p class="mb-3">{{ task.description }}</p>
 
-            <div class="text-caption mt-3">
-              <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
-              Deadline: {{ new Date(task.date_to).toLocaleString() }}
-            </div>
+              <div :class="{ 'text-error': isOverdue(task) }">
+                  <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
+                  Deadline: {{ formatDate(task.date_to) }}
+              </div>
           </v-card-text>
 
           <v-card-actions>

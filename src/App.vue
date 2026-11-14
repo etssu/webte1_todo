@@ -10,7 +10,6 @@ const {
   errorMessage,
   taskStatuses,
 
-
   // New task fields
   title,
   description,
@@ -23,6 +22,7 @@ const {
 
   // Filters
   searchQuery,
+  sortBy,
   taskFilter,
 
   // dialogs
@@ -47,6 +47,7 @@ const {
   todoTasks,
   inProgressTasks,
   finishedTasks,
+  unfinishedTasks,
 
   loadTasks,
   saveTask,
@@ -108,14 +109,26 @@ const {
           </v-btn>
         </v-row>
 
-        <v-row justify="center" class="mt-6">
-          <v-col cols="12" md="6">
+        <v-row justify="center" align="center" class="mt-6">
+          <v-col cols="12" md="5">
             <v-text-field
               v-model="searchQuery"
               label="Search tasks"
               placeholder="Enter task title"
               prepend-inner-icon="mdi-magnify"
               clearable
+              hide-details
+            />
+          </v-col>
+
+          <v-col cols="12" md="3">
+            <v-select
+              v-model="sortBy"
+              label="Sort by"
+              :items="[
+                { title: 'Start date', value: 'date_from' },
+                { title: 'End date', value: 'date_to' }
+              ]"
               hide-details
             />
           </v-col>
@@ -138,6 +151,7 @@ const {
           <template v-if="taskFilter === 'all'">
               <!-- TODO -->
             <TaskColumn
+              :sort-by="sortBy"
               title="TODO"
               subtitle="Tasks waiting to be started"
               :tasks="todoTasks"
@@ -152,6 +166,7 @@ const {
 
             <!-- IN PROGRESS -->
             <TaskColumn
+              :sort-by="sortBy"
               title="IN PROGRESS"
               subtitle="Tasks currently in progress"
               :tasks="inProgressTasks"
@@ -166,6 +181,7 @@ const {
 
             <!-- DONE -->
             <TaskColumn
+              :sort-by="sortBy"
               title="DONE"
               subtitle="Finished Tasks"
               :tasks="finishedTasks"
@@ -183,9 +199,10 @@ const {
           <template v-else-if="taskFilter === 'todo'">
             <TaskColumn
               full-width
+              :sort-by="sortBy"
               title="TODO"
               subtitle="All unfinished tasks"
-              :tasks="[...todoTasks, ...inProgressTasks]"
+              :tasks="unfinishedTasks"
               :task-statuses="taskStatuses"
               color="#F7D1CD"
               @change-status="changeTaskStatus"
@@ -200,6 +217,7 @@ const {
           <template v-else>
             <TaskColumn
               full-width
+              :sort-by="sortBy"
               title="DONE"
               subtitle="All completed tasks"
               :tasks="finishedTasks"
