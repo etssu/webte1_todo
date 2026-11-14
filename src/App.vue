@@ -51,6 +51,7 @@ const {
   openEditDialog,
   saveEditedTask,
   openDeleteDialog,
+  openDeleteDialogFromEdit,
   confirmDeleteTask,
   confirmResetTasks,
   openAddDialogFromCalendar,
@@ -231,16 +232,43 @@ const {
               :rules="dateToRules"
             />
 
-            <v-checkbox v-model="editIsFinished" label="Task completed" />
+            <v-select
+              v-model="editIsFinished"
+              label="Status"
+              :items="[
+                { title: 'TODO', value: 'todo' },
+                { title: 'IN PROGRESS', value: 'in_progress' },
+                { title: 'DONE', value: 'done' }
+              ]"
+              item-title="title"
+              item-value="value"
+            />
           </v-form>
         </v-card-text>
 
         <v-card-actions>
+          <v-btn
+            color="error"
+            variant="outlined"
+            :disabled="isSaving"
+            @click="openDeleteDialogFromEdit"
+          >
+            <v-icon start>mdi-delete</v-icon>
+            Delete
+          </v-btn>
+
           <v-spacer />
 
-          <v-btn variant="text" @click="showEditDialog = false"> Cancel </v-btn>
+          <v-btn variant="text" @click="showEditDialog = false">
+            Cancel
+          </v-btn>
 
-          <v-btn color="primary" :loading="isSaving" :disabled="isSaving" @click="saveEditedTask">
+          <v-btn
+            color="primary"
+            :loading="isSaving"
+            :disabled="isSaving"
+            @click="saveEditedTask"
+          >
             Save changes
           </v-btn>
         </v-card-actions>

@@ -25,7 +25,7 @@ const title = ref('');
 const description = ref('');
 const dateFrom = ref('');
 const dateTo = ref('');
-const editIsFinished = ref(false);
+const editIsFinished = ref('todo');
 
 // Form references
 const addForm = ref(null);
@@ -114,6 +114,13 @@ async function loadTasks() {
 
 
 // TASK CREATION
+function clearTaskForm() {
+    title.value = '';
+    description.value = '';
+    dateFrom.value = '';
+    dateTo.value = '';
+}
+
 async function createTask(task) {
     try {
         await addTask(studentName.value.trim(), task);
@@ -147,8 +154,8 @@ async function saveTask() {
     const task = {
         title: title.value.trim(),
         description: description.value.trim(),
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
+        date_from: convertToUTC(dateFrom.value),
+        date_to: convertToUTC(dateTo.value),
         is_finished: false
     };
 
@@ -159,10 +166,7 @@ async function saveTask() {
 
         notifySuccess('Task added successfully!');
 
-        title.value = '';
-        description.value = '';
-        dateFrom.value = '';
-        dateTo.value = '';
+        clearTaskForm();
 
         showAddDialog.value = false;
 
@@ -172,6 +176,8 @@ async function saveTask() {
 }
 
 function openAddDialogFromCalendar(info) {
+   clearTaskForm();
+
   const formatDateTime = (date) => {
     const pad = (value) => String(value).padStart(2, '0')
 
@@ -233,6 +239,10 @@ async function restoreTask(taskId, newStatus) {
 
 
 // TASK EDITING
+function convertToUTC(date) {
+    return new Date(date).toISOString();
+}
+
 function formatDateForInput(date) {
     if (!date) return '';
 
@@ -249,7 +259,9 @@ function openEditDialog(task) {
     description.value = task.description || '';
     dateFrom.value = formatDateForInput(task.date_from);
     dateTo.value = formatDateForInput(task.date_to);
-    editIsFinished.value = task.is_finished;
+    editIsFinished.value = task.is_finished
+        ? 'done'
+        : (taskStatuses.value[task.id] || 'todo');
 
     showEditDialog.value = true;
 }
@@ -265,9 +277,9 @@ async function saveEditedTask() {
     const updatedTask = {
         title: title.value.trim(),
         description: description.value.trim(),
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
-        is_finished: editIsFinished.value
+        date_from: convertToUTC(dateFrom.value),
+        date_to: convertToUTC(dateTo.value),
+        is_finished: editIsFinished.value === 'done'
     };
 
     try {
@@ -276,7 +288,8 @@ async function saveEditedTask() {
             editingTaskId.value,
             updatedTask
         );
-
+        
+        taskStatuses.value[editingTaskId.value] = editIsFinished.value;
         showEditDialog.value = false;
         notifySuccess('Task updated successfully!');
 
@@ -299,6 +312,11 @@ async function saveEditedTask() {
 }
 
 // TASK DELETION 
+function openDeleteDialogFromEdit() {
+    deletingTaskId.value = editingTaskId.value;
+    showDeleteDialog.value = true;
+}
+
 function openDeleteDialog(task) {
     deletingTaskId.value = task.id;
     showDeleteDialog.value = true;
@@ -315,6 +333,7 @@ async function confirmDeleteTask() {
         );
 
         showDeleteDialog.value = false;
+        showEditDialog.value = false;
         notifySuccess('Task deleted successfully!');
 
         try {
@@ -489,6 +508,7 @@ export function useTasks() {
         openEditDialog,
         saveEditedTask,
         openDeleteDialog,
+        openDeleteDialogFromEdit,
         confirmDeleteTask,
         confirmResetTasks,
         openAddDialogFromCalendar,
