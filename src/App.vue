@@ -105,11 +105,11 @@ const technologies = [
 
 <template>
   <v-app>
-    <v-app-bar color="primary" elevation="2" height="145">
-      <div class="d-flex flex-column align-center justify-center w-100">
-        <div class="main-title font-weight-bold">Môj TODO List</div>
+    <v-app-bar color="primary" elevation="2" height="auto">
+      <div class="header-content">
+        <div class="main-title font-weight-bold">Môj zoznam úloh</div>
 
-        <div class="d-flex align-center justify-center mt-1">
+        <nav class="header-navigation">
           <v-btn href="#tasks" variant="text" color="white" size="small">
             <v-icon start>mdi-format-list-checks</v-icon>
             Úlohy
@@ -124,7 +124,7 @@ const technologies = [
             <v-icon start>mdi-information-outline</v-icon>
             O projekte
           </v-btn>
-        </div>
+        </nav>
       </div>
     </v-app-bar>
 
@@ -190,13 +190,13 @@ const technologies = [
           </v-col>
         </v-row>
 
-        <v-row justify="center" class="mt-6">
+        <v-row justify="center" align="center" class="mt-6">
           <v-btn-toggle
             v-model="taskFilter"
             color="secondary"
             mandatory
             rounded="lg"
-            class="flex-wrap"
+            class="task-filter-toggle"
           >
             <v-btn value="all">Všetky</v-btn>
             <v-btn value="todo">Nedokončené</v-btn>

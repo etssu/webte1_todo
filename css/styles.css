@@ -92,3 +92,52 @@ h1, h2, h3,
     font-size: 20px;
     font-style: italic;
 }
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 8px;
+  gap: 6px;
+}
+
+.main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.header-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+}
+
+@media (max-width: 400px) {
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filters-row > .v-col {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .task-filter-toggle {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+  }
+
+  .task-filter-toggle .v-btn {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+}
