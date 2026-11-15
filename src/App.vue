@@ -66,41 +66,41 @@ const {
 const technologies = [
   {
     name: 'Vue 3',
-    description: 'JavaScript framework na tvorbu používateľského rozhrania.'
+    description: 'JavaScript framework na tvorbu používateľského rozhrania.',
   },
   {
     name: 'Vuetify 4',
-    description: 'Knižnica UI komponentov založená na Material Design.'
+    description: 'Knižnica UI komponentov založená na Material Design.',
   },
   {
     name: 'FullCalendar',
-    description: 'Knižnica na zobrazovanie úloh v kalendári.'
+    description: 'Knižnica na zobrazovanie úloh v kalendári.',
   },
   {
     name: 'Vite',
-    description: 'Nástroj na vývoj a zostavenie aplikácie.'
+    description: 'Nástroj na vývoj a zostavenie aplikácie.',
   },
   {
     name: 'Material Design Icons',
-    description: 'Knižnica ikon použitých v používateľskom rozhraní.'
+    description: 'Knižnica ikon použitých v používateľskom rozhraní.',
   },
   {
     name: 'Google Fonts',
-    description: 'Externé typy písma Playfair Display a Nunito.'
+    description: 'Externé typy písma Playfair Display a Nunito.',
   },
   {
     name: 'Fetch API',
-    description: 'Komunikácia s REST API pomocou HTTP požiadaviek.'
+    description: 'Komunikácia s REST API pomocou HTTP požiadaviek.',
   },
   {
     name: 'REST API',
-    description: 'Rozhranie na načítanie, vytváranie, úpravu a mazanie úloh.'
+    description: 'Rozhranie na načítanie, vytváranie, úpravu a mazanie úloh.',
   },
   {
     name: 'HTML5, CSS3 a JavaScript',
-    description: 'Základné webové technológie použité pri tvorbe aplikácie.'
-  }
-]
+    description: 'Základné webové technológie použité pri tvorbe aplikácie.',
+  },
+];
 </script>
 
 <template>
@@ -191,7 +191,13 @@ const technologies = [
         </v-row>
 
         <v-row justify="center" class="mt-6">
-          <v-btn-toggle v-model="taskFilter" color="secondary" mandatory rounded="lg">
+          <v-btn-toggle
+            v-model="taskFilter"
+            color="secondary"
+            mandatory
+            rounded="lg"
+            class="flex-wrap"
+          >
             <v-btn value="all">Všetky</v-btn>
             <v-btn value="todo">Nedokončené</v-btn>
             <v-btn value="done">Dokončené</v-btn>
@@ -323,8 +329,8 @@ const technologies = [
               <h3 class="about-card-title mb-3">Sledujte svoj pokrok</h3>
 
               <p>
-                Spravujte svoje úlohy pomocou stavov Na spracovanie,
-                Rozpracované a Dokončené a sledujte svoj pokrok.
+                Spravujte svoje úlohy pomocou stavov Na spracovanie, Rozpracované a Dokončené a
+                sledujte svoj pokrok.
               </p>
             </v-card>
           </v-col>
@@ -336,8 +342,8 @@ const technologies = [
               <h3 class="about-card-title mb-3">Plánujte dopredu</h3>
 
               <p>
-                Využívajte kalendár na prehľad úloh, sledovanie blížiacich
-                sa termínov a plánovanie svojho času.
+                Využívajte kalendár na prehľad úloh, sledovanie blížiacich sa termínov a plánovanie
+                svojho času.
               </p>
             </v-card>
           </v-col>
@@ -345,17 +351,14 @@ const technologies = [
 
         <div class="text-center mt-10">
           <p class="about-description">
-            Aplikácia vytvorená na jednoduchšiu, prehľadnejšiu
-            a menej stresujúcu správu úloh.
+            Aplikácia vytvorená na jednoduchšiu, prehľadnejšiu a menej stresujúcu správu úloh.
           </p>
         </div>
 
         <v-divider class="my-8" />
 
         <div class="text-center">
-          <h3 class="text-h5 font-weight-bold mb-4">
-            Použité technológie a zdroje
-          </h3>
+          <h3 class="text-h5 font-weight-bold mb-4">Použité technológie a zdroje</h3>
 
           <v-row justify="center">
             <v-col
@@ -365,11 +368,7 @@ const technologies = [
               sm="6"
               md="4"
             >
-              <v-card
-                class="pa-4 h-100"
-                rounded="lg"
-                elevation="1"
-              >
+              <v-card class="pa-4 h-100" rounded="lg" elevation="1">
                 <h4 class="text-h6 font-weight-bold mb-2">
                   {{ technology.name }}
                 </h4>
@@ -393,9 +392,7 @@ const technologies = [
           </v-col>
 
           <v-col cols="12" md="6" class="text-center text-md-right">
-            <div class="footer-copyright">
-              © 2026 Môj TODO List
-            </div>
+            <div class="footer-copyright">© 2026 Môj TODO List</div>
           </v-col>
         </v-row>
       </v-container>
@@ -458,12 +455,7 @@ const technologies = [
           <v-form ref="editForm">
             <v-text-field v-model="title" label="Názov" :rules="titleRules" />
 
-            <v-textarea
-              v-model="description"
-              label="Popis"
-              rows="3"
-              :rules="descriptionRules"
-            />
+            <v-textarea v-model="description" label="Popis" rows="3" :rules="descriptionRules" />
 
             <v-text-field
               v-model="dateFrom"
