@@ -1,7 +1,7 @@
 <script setup>
 import { useTasks } from './composables/useTasks.js';
 import TaskColumn from './components/TaskColumn.vue';
-import TodoCalendar from './components/TodoCalendar.vue'
+import TodoCalendar from './components/TodoCalendar.vue';
 
 const {
   // store tasks
@@ -62,20 +62,76 @@ const {
   confirmResetTasks,
   openAddDialogFromCalendar,
 } = useTasks();
+
+const technologies = [
+  {
+    name: 'Vue 3',
+    description: 'JavaScript framework na tvorbu používateľského rozhrania.'
+  },
+  {
+    name: 'Vuetify 4',
+    description: 'Knižnica UI komponentov založená na Material Design.'
+  },
+  {
+    name: 'FullCalendar',
+    description: 'Knižnica na zobrazovanie úloh v kalendári.'
+  },
+  {
+    name: 'Vite',
+    description: 'Nástroj na vývoj a zostavenie aplikácie.'
+  },
+  {
+    name: 'Material Design Icons',
+    description: 'Knižnica ikon použitých v používateľskom rozhraní.'
+  },
+  {
+    name: 'Google Fonts',
+    description: 'Externé typy písma Playfair Display a Nunito.'
+  },
+  {
+    name: 'Fetch API',
+    description: 'Komunikácia s REST API pomocou HTTP požiadaviek.'
+  },
+  {
+    name: 'REST API',
+    description: 'Rozhranie na načítanie, vytváranie, úpravu a mazanie úloh.'
+  },
+  {
+    name: 'HTML5, CSS3 a JavaScript',
+    description: 'Základné webové technológie použité pri tvorbe aplikácie.'
+  }
+]
 </script>
 
 <template>
   <v-app>
-    <v-app-bar color="primary" elevation="2" height="110">
-      <v-app-bar-title class="text-center app-bar-title"> Moj TODO List </v-app-bar-title>
+    <v-app-bar color="primary" elevation="2" height="145">
+      <div class="d-flex flex-column align-center justify-center w-100">
+        <div class="main-title font-weight-bold">Môj TODO List</div>
+
+        <div class="d-flex align-center justify-center mt-1">
+          <v-btn href="#tasks" variant="text" color="white" size="small">
+            <v-icon start>mdi-format-list-checks</v-icon>
+            Úlohy
+          </v-btn>
+
+          <v-btn href="#calendar" variant="text" color="white" size="small">
+            <v-icon start>mdi-calendar-month</v-icon>
+            Kalendár
+          </v-btn>
+
+          <v-btn href="#about" variant="text" color="white" size="small">
+            <v-icon start>mdi-information-outline</v-icon>
+            O projekte
+          </v-btn>
+        </div>
+      </div>
     </v-app-bar>
 
     <v-main>
       <v-row justify="center" align="center" class="mt-6">
-
         <v-col cols="12" md="5">
-          <v-text-field v-model="studentName" label="Student ID" placeholder="Enter your ID" />
-
+          <v-text-field v-model="studentName" label="ID študenta" placeholder="Zadajte svoje ID" />
           <p v-if="errorMessage" class="text-error text-caption mt-n4">
             {{ errorMessage }}
           </p>
@@ -89,23 +145,23 @@ const {
             :disabled="isLoading"
             @click="loadTasks"
           >
-            Load tasks
+            Načítať úlohy
           </v-btn>
         </v-col>
       </v-row>
 
       <v-progress-linear v-if="isLoading" indeterminate color="primary" class="mb-4" />
 
-      <v-container>
+      <v-container id="tasks">
         <v-row justify="center" class="mt-2">
           <v-btn color="secondary" @click="showAddDialog = true">
             <v-icon start>mdi-plus</v-icon>
-            Add task
+            Pridať úlohu
           </v-btn>
 
           <v-btn color="error" variant="outlined" @click="showResetDialog = true">
             <v-icon start>mdi-refresh</v-icon>
-            Reset tasks
+            Obnoviť úlohy
           </v-btn>
         </v-row>
 
@@ -113,8 +169,8 @@ const {
           <v-col cols="12" md="5">
             <v-text-field
               v-model="searchQuery"
-              label="Search tasks"
-              placeholder="Enter task title"
+              label="Hľadať úlohy"
+              placeholder="Zadajte názov úlohy"
               prepend-inner-icon="mdi-magnify"
               clearable
               hide-details
@@ -124,10 +180,10 @@ const {
           <v-col cols="12" md="3">
             <v-select
               v-model="sortBy"
-              label="Sort by"
+              label="Zoradiť podľa"
               :items="[
-                { title: 'Start date', value: 'date_from' },
-                { title: 'End date', value: 'date_to' }
+                { title: 'Dátum začiatku', value: 'date_from' },
+                { title: 'Dátum ukončenia', value: 'date_to' },
               ]"
               hide-details
             />
@@ -135,25 +191,20 @@ const {
         </v-row>
 
         <v-row justify="center" class="mt-6">
-          <v-btn-toggle
-            v-model="taskFilter"
-            color="secondary"
-            mandatory
-            rounded="lg"
-          >
-            <v-btn value="all">All</v-btn>
-            <v-btn value="todo">TODO</v-btn>
-            <v-btn value="done">Done</v-btn>
+          <v-btn-toggle v-model="taskFilter" color="secondary" mandatory rounded="lg">
+            <v-btn value="all">Všetky</v-btn>
+            <v-btn value="todo">Nedokončené</v-btn>
+            <v-btn value="done">Dokončené</v-btn>
           </v-btn-toggle>
         </v-row>
 
         <v-row class="mt-6" align="start">
           <template v-if="taskFilter === 'all'">
-              <!-- TODO -->
+            <!-- TODO -->
             <TaskColumn
               :sort-by="sortBy"
-              title="TODO"
-              subtitle="Tasks waiting to be started"
+              title="Na spracovanie"
+              subtitle="Úlohy čakajúce na začatie"
               :tasks="todoTasks"
               :task-statuses="taskStatuses"
               color="#F7D1CD"
@@ -167,8 +218,8 @@ const {
             <!-- IN PROGRESS -->
             <TaskColumn
               :sort-by="sortBy"
-              title="IN PROGRESS"
-              subtitle="Tasks currently in progress"
+              title="Rozpracované"
+              subtitle="Úlohy, na ktorých sa práve pracuje"
               :tasks="inProgressTasks"
               :task-statuses="taskStatuses"
               color="#E8C2CA"
@@ -182,8 +233,8 @@ const {
             <!-- DONE -->
             <TaskColumn
               :sort-by="sortBy"
-              title="DONE"
-              subtitle="Finished Tasks"
+              title="Dokončené"
+              subtitle="Dokončené úlohy"
               :tasks="finishedTasks"
               :task-statuses="taskStatuses"
               color="#D1B3C4"
@@ -200,8 +251,8 @@ const {
             <TaskColumn
               full-width
               :sort-by="sortBy"
-              title="TODO"
-              subtitle="All unfinished tasks"
+              title="Na spracovanie"
+              subtitle="Všetky nedokončené úlohy"
               :tasks="unfinishedTasks"
               :task-statuses="taskStatuses"
               color="#F7D1CD"
@@ -213,13 +264,13 @@ const {
             />
           </template>
 
-           <!-- DONE -->
+          <!-- DONE -->
           <template v-else>
             <TaskColumn
               full-width
               :sort-by="sortBy"
-              title="DONE"
-              subtitle="All completed tasks"
+              title="Dokončené"
+              subtitle="Všetky dokončené úlohy"
               :tasks="finishedTasks"
               :task-statuses="taskStatuses"
               color="#D1B3C4"
@@ -233,44 +284,154 @@ const {
         </v-row>
       </v-container>
 
-      <v-container>
-        <TodoCalendar :tasks="tasks" 
-          @create-task="openAddDialogFromCalendar" 
-          @edit-task="openEditDialog"/>
+      <v-container id="calendar">
+        <TodoCalendar
+          :tasks="tasks"
+          @create-task="openAddDialogFromCalendar"
+          @edit-task="openEditDialog"
+        />
+      </v-container>
+
+      <v-container id="about" class="about-section py-12">
+        <v-divider class="mb-10" />
+
+        <div class="text-center mb-10">
+          <h2 class="about-title mb-3">O projekte</h2>
+          <p class="text-body-1 text-medium-emphasis">
+            Jednoduchý a prehľadný spôsob správy každodenných úloh.
+          </p>
+        </div>
+
+        <v-row justify="center" align="stretch">
+          <v-col cols="12" md="4">
+            <v-card class="about-card pa-5 h-100" elevation="2" rounded="lg">
+              <v-icon size="36" color="primary" class="mb-4"> mdi-calendar-check </v-icon>
+
+              <h3 class="about-card-title mb-3">Majte vo veciach prehľad</h3>
+
+              <p>
+                Majte všetky úlohy na jednom mieste, nastavujte termíny a organizujte si každodenné
+                povinnosti.
+              </p>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="4">
+            <v-card class="about-card pa-5 h-100" elevation="2" rounded="lg">
+              <v-icon size="36" color="primary" class="mb-4"> mdi-chart-timeline-variant </v-icon>
+
+              <h3 class="about-card-title mb-3">Sledujte svoj pokrok</h3>
+
+              <p>
+                Spravujte svoje úlohy pomocou stavov Na spracovanie,
+                Rozpracované a Dokončené a sledujte svoj pokrok.
+              </p>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="4">
+            <v-card class="about-card pa-5 h-100" elevation="2" rounded="lg">
+              <v-icon size="36" color="primary" class="mb-4"> mdi-calendar-month </v-icon>
+
+              <h3 class="about-card-title mb-3">Plánujte dopredu</h3>
+
+              <p>
+                Využívajte kalendár na prehľad úloh, sledovanie blížiacich
+                sa termínov a plánovanie svojho času.
+              </p>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <div class="text-center mt-10">
+          <p class="about-description">
+            Aplikácia vytvorená na jednoduchšiu, prehľadnejšiu
+            a menej stresujúcu správu úloh.
+          </p>
+        </div>
+
+        <v-divider class="my-8" />
+
+        <div class="text-center">
+          <h3 class="text-h5 font-weight-bold mb-4">
+            Použité technológie a zdroje
+          </h3>
+
+          <v-row justify="center">
+            <v-col
+              v-for="technology in technologies"
+              :key="technology.name"
+              cols="12"
+              sm="6"
+              md="4"
+            >
+              <v-card
+                class="pa-4 h-100"
+                rounded="lg"
+                elevation="1"
+              >
+                <h4 class="text-h6 font-weight-bold mb-2">
+                  {{ technology.name }}
+                </h4>
+
+                <p class="text-body-2 text-medium-emphasis">
+                  {{ technology.description }}
+                </p>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
       </v-container>
     </v-main>
 
+    <v-footer class="app-footer">
+      <v-container>
+        <v-row align="center" justify="space-between">
+          <v-col cols="12" md="6" class="text-center text-md-left">
+            <div class="footer-title">Moj TODO List</div>
+            <div class="footer-subtitle">Organizujte svoje úlohy. Plánujte svoj čas.</div>
+          </v-col>
+
+          <v-col cols="12" md="6" class="text-center text-md-right">
+            <div class="footer-copyright">
+              © 2026 Môj TODO List
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-footer>
+
     <v-dialog v-model="showAddDialog" max-width="600">
       <v-card rounded="lg">
-        <v-card-title class="text-h5 font-weight-bold"> Add new task </v-card-title>
+        <v-card-title class="text-h5 font-weight-bold"> Pridať novú úlohu </v-card-title>
 
         <v-card-text>
           <v-form ref="addForm">
             <v-text-field
               v-model="title"
-              label="Title"
-              placeholder="Enter task title"
+              label="Názov"
+              placeholder="Zadajte názov úlohy"
               :rules="titleRules"
             />
 
             <v-textarea
               v-model="description"
-              label="Description"
-              placeholder="Enter task description"
+              label="Popis"
+              placeholder="Zadajte popis úlohy"
               rows="3"
               :rules="descriptionRules"
             />
 
             <v-text-field
               v-model="dateFrom"
-              label="Start date"
+              label="Dátum začiatku"
               type="datetime-local"
               :rules="dateFromRules"
             />
 
             <v-text-field
               v-model="dateTo"
-              label="End date"
+              label="Dátum ukončenia"
               type="datetime-local"
               :rules="dateToRules"
             />
@@ -280,10 +441,10 @@ const {
         <v-card-actions>
           <v-spacer />
 
-          <v-btn variant="text" @click="showAddDialog = false"> Cancel </v-btn>
+          <v-btn variant="text" @click="showAddDialog = false"> Zrušiť </v-btn>
 
           <v-btn color="primary" :loading="isSaving" :disabled="isSaving" @click="saveTask">
-            Save
+            Uložiť
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -291,43 +452,41 @@ const {
 
     <v-dialog v-model="showEditDialog" max-width="600">
       <v-card rounded="lg">
-        <v-card-title class="text-h5 font-weight-bold"> Edit task </v-card-title>
+        <v-card-title class="text-h5 font-weight-bold"> Upraviť úlohu </v-card-title>
 
         <v-card-text>
           <v-form ref="editForm">
-            <v-text-field v-model="title" label="Title" :rules="titleRules" />
+            <v-text-field v-model="title" label="Názov" :rules="titleRules" />
 
             <v-textarea
               v-model="description"
-              label="Description"
+              label="Popis"
               rows="3"
               :rules="descriptionRules"
             />
 
             <v-text-field
               v-model="dateFrom"
-              label="Start date"
+              label="Dátum začiatku"
               type="datetime-local"
               :rules="dateFromRules"
             />
 
             <v-text-field
               v-model="dateTo"
-              label="End date"
+              label="Dátum ukončenia"
               type="datetime-local"
               :rules="dateToRules"
             />
 
             <v-select
               v-model="editIsFinished"
-              label="Status"
+              label="	Stav"
               :items="[
-                { title: 'TODO', value: 'todo' },
-                { title: 'IN PROGRESS', value: 'in_progress' },
-                { title: 'DONE', value: 'done' }
+                { title: 'Na spracovanie', value: 'todo' },
+                { title: 'Rozpracované', value: 'in_progress' },
+                { title: 'Dokončené', value: 'done' },
               ]"
-              item-title="title"
-              item-value="value"
             />
           </v-form>
         </v-card-text>
@@ -340,22 +499,15 @@ const {
             @click="openDeleteDialogFromEdit"
           >
             <v-icon start>mdi-delete</v-icon>
-            Delete
+            Odstrániť
           </v-btn>
 
           <v-spacer />
 
-          <v-btn variant="text" @click="showEditDialog = false">
-            Cancel
-          </v-btn>
+          <v-btn variant="text" @click="showEditDialog = false"> Zrušiť </v-btn>
 
-          <v-btn
-            color="primary"
-            :loading="isSaving"
-            :disabled="isSaving"
-            @click="saveEditedTask"
-          >
-            Save changes
+          <v-btn color="primary" :loading="isSaving" :disabled="isSaving" @click="saveEditedTask">
+            Uložiť zmeny
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -363,20 +515,18 @@ const {
 
     <v-dialog v-model="showDeleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Delete task?</v-card-title>
+        <v-card-title>Odstrániť úlohu?</v-card-title>
 
         <v-card-text>
-          Are you sure you want to delete this task?
+          Naozaj chcete odstrániť túto úlohu?
 
-          <span class="text-error">
-              This action cannot be undone.
-          </span>
+          <span class="text-error"> Túto akciu nie je možné vrátiť späť. </span>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
 
-          <v-btn variant="text" @click="showDeleteDialog = false"> Cancel </v-btn>
+          <v-btn variant="text" @click="showDeleteDialog = false"> Zrušiť </v-btn>
 
           <v-btn
             color="error"
@@ -385,7 +535,7 @@ const {
             :disabled="isDeleting"
             @click="confirmDeleteTask"
           >
-            Delete
+            Odstrániť
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -393,17 +543,17 @@ const {
 
     <v-dialog v-model="showResetDialog" max-width="450">
       <v-card rounded="lg">
-        <v-card-title class="text-h5 font-weight-bold"> Reset tasks? </v-card-title>
+        <v-card-title class="text-h5 font-weight-bold"> Obnoviť úlohy? </v-card-title>
 
         <v-card-text>
-          Are you sure you want to reset your tasks to the initial sample data?
-          <span class="text-error font-weight-bold"> All your current tasks will be deleted. </span>
+          Naozaj chcete obnoviť úlohy na pôvodné ukážkové údaje?
+          <span class="text-error font-weight-bold"> Všetky aktuálne úlohy budú odstránené. </span>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
 
-          <v-btn variant="text" @click="showResetDialog = false"> Cancel </v-btn>
+          <v-btn variant="text" @click="showResetDialog = false"> Zrušiť </v-btn>
 
           <v-btn
             color="error"
@@ -412,7 +562,7 @@ const {
             :disabled="isResetting"
             @click="confirmResetTasks"
           >
-            Reset
+            Obnoviť
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -422,7 +572,7 @@ const {
       {{ successMessage }}
 
       <template #actions>
-        <v-btn variant="text" @click="showSuccess = false"> Close </v-btn>
+        <v-btn variant="text" @click="showSuccess = false"> Zavrieť </v-btn>
       </template>
     </v-snackbar>
   </v-app>

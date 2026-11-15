@@ -71,7 +71,7 @@ const formatDate = (date) => {
 
       <v-card-text>
         <div class="text-h4 font-weight-bold">
-          {{ tasks.length }} Tasks
+          {{ tasks.length }} úloh
         </div>
 
         <v-card
@@ -86,7 +86,12 @@ const formatDate = (date) => {
           </v-card-title>
 
           <v-card-text>
-              <p class="mb-3">{{ task.description }}</p>
+              <p class="mb-3 text-medium-emphasis">{{ task.description }}</p>
+
+              <div class="mb-1 text-medium-emphasis">
+                  <v-icon size="small" class="mr-1">mdi-calendar-start</v-icon>
+                  Začiatok: {{ formatDate(task.date_from) }}
+              </div>
 
               <div :class="{ 'text-error': isOverdue(task) }">
                   <v-icon size="small" class="mr-1">mdi-calendar-clock</v-icon>
@@ -106,10 +111,10 @@ const formatDate = (date) => {
                 >
                   {{
                     task.is_finished
-                      ? 'Done'
+                      ? 'Dokončené'
                       : (taskStatuses[task.id] || 'todo') === 'in_progress'
-                        ? 'In Progress'
-                        : 'To Do'
+                        ? 'Rozpracované'
+                        : 'Na spracovanie'
                   }}
                 </v-chip>
               </template>
@@ -117,12 +122,12 @@ const formatDate = (date) => {
               <v-list density="compact">
                 <template v-if="task.is_finished">
                   <v-list-item
-                    title="To Do"
+                    title="Na spracovanie"
                     @click="$emit('restore', task.id, 'todo')"
                   />
 
                   <v-list-item
-                    title="In Progress"
+                    title="Rozpracované"
                     @click="$emit('restore', task.id, 'in_progress')"
                   />
                 </template>
@@ -130,18 +135,18 @@ const formatDate = (date) => {
                 <template v-else>
                   <v-list-item
                     v-if="(taskStatuses[task.id] || 'todo') !== 'todo'"
-                    title="To Do"
+                    title="Na spracovanie"
                     @click="$emit('change-status', task.id, 'todo')"
                   />
 
                   <v-list-item
                     v-if="(taskStatuses[task.id] || 'todo') !== 'in_progress'"
-                    title="In Progress"
+                    title="Rozpracované"
                     @click="$emit('change-status', task.id, 'in_progress')"
                   />
 
                   <v-list-item
-                    title="Done"
+                    title="Dokončené"
                     @click="$emit('complete', task.id)"
                   />
                 </template>
@@ -168,10 +173,10 @@ const formatDate = (date) => {
         </v-card>
 
         <div
-          v-if="tasks.length === 0"
-          class="text-center text-medium-emphasis py-4"
+            v-if="tasks.length === 0"
+            class="text-center text-medium-emphasis py-4"
         >
-          No tasks yet
+            Zatiaľ žiadne úlohy
         </div>
       </v-card-text>
     </v-card>

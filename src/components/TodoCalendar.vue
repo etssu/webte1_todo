@@ -90,12 +90,12 @@ const events = computed(() => {
     <div class="calendar-legend">
       <div class="legend-item">
           <span class="legend-color pending"></span>
-          <span>Not completed</span>
+          <span>Nedokončené</span>
       </div>
 
       <div class="legend-item">
           <span class="legend-color finished"></span>
-          <span>Completed</span>
+          <span>Dokončené</span>
       </div>
     </div>
 

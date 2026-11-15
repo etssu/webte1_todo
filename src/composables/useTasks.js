@@ -163,30 +163,30 @@ async function createTask(task) {
 }
 
 async function saveTask() {
-    const { valid } = await addForm.value.validate();
-
-    if (!valid) return;
+    if (isSaving.value) return;
 
     isSaving.value = true;
-    errorMessage.value = '';
-
-    const task = {
-        title: title.value.trim(),
-        description: description.value.trim(),
-        date_from: convertToUTC(dateFrom.value),
-        date_to: convertToUTC(dateTo.value),
-        is_finished: false
-    };
 
     try {
-        const success = await createTask(task);
+        const { valid } = await addForm.value.validate();
+        if (!valid) return;
 
+        errorMessage.value = '';
+
+        const task = {
+            title: title.value.trim(),
+            description: description.value.trim(),
+            date_from: convertToUTC(dateFrom.value),
+            date_to: convertToUTC(dateTo.value),
+            is_finished: false
+        };
+
+        const success = await createTask(task);
         if (!success) return;
 
         notifySuccess('Task added successfully!');
 
         clearTaskForm();
-
         showAddDialog.value = false;
 
     } finally {
@@ -286,45 +286,45 @@ function openEditDialog(task) {
 }
 
 async function saveEditedTask() {
-    const { valid } = await editForm.value.validate();
-
-    if (!valid) return;
+    if (isSaving.value) return;
 
     isSaving.value = true;
-    errorMessage.value = '';
-
-    const updatedTask = {
-        title: title.value.trim(),
-        description: description.value.trim(),
-        date_from: convertToUTC(dateFrom.value),
-        date_to: convertToUTC(dateTo.value),
-        is_finished: editIsFinished.value === 'done'
-    };
 
     try {
+        const { valid } = await editForm.value.validate();
+
+        if (!valid) return;
+
+        errorMessage.value = '';
+
+        const updatedTask = {
+            title: title.value.trim(),
+            description: description.value.trim(),
+            date_from: convertToUTC(dateFrom.value),
+            date_to: convertToUTC(dateTo.value),
+            is_finished: editIsFinished.value === 'done'
+        };
+
         await updateTask(
             studentName.value.trim(),
             editingTaskId.value,
             updatedTask
         );
-        
+
         taskStatuses.value[editingTaskId.value] = editIsFinished.value;
         showEditDialog.value = false;
+
         notifySuccess('Task updated successfully!');
 
         try {
             await loadTasks();
         } catch (error) {
-            console.error(
-                'Task updated, but failed to refresh the list:',
-                error
-            );
+            console.error('Failed to refresh tasks:', error);
         }
 
     } catch (error) {
         errorMessage.value = 'Failed to update task.';
-        console.error('Failed to update task:', error);
-
+        console.error(error);
     } finally {
         isSaving.value = false;
     }

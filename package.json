@@ -11,7 +11,8 @@
   "dependencies": {
     "@fullcalendar/vue3": "^7.1.5",
     "@mdi/font": "^7.4.47",
-    "vue": "^3.5.42"
+    "vue": "^3.5.42",
+    "vue-router": "^5.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
