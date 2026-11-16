@@ -105,23 +105,23 @@ const technologies = [
 
 <template>
   <v-app>
-    <v-app-bar color="primary" elevation="2" height="auto">
+    <v-app-bar color="primary" elevation="2" height="100">
       <div class="header-content">
         <div class="main-title font-weight-bold">Môj zoznam úloh</div>
 
         <nav class="header-navigation">
           <v-btn href="#tasks" variant="text" color="white" size="small">
-            <v-icon start>mdi-format-list-checks</v-icon>
+            <v-icon start size="26">mdi-format-list-checks</v-icon>
             Úlohy
           </v-btn>
 
           <v-btn href="#calendar" variant="text" color="white" size="small">
-            <v-icon start>mdi-calendar-month</v-icon>
+            <v-icon start size="26">mdi-calendar-month</v-icon>
             Kalendár
           </v-btn>
 
           <v-btn href="#about" variant="text" color="white" size="small">
-            <v-icon start>mdi-information-outline</v-icon>
+            <v-icon start size="26">mdi-information-outline</v-icon>
             O projekte
           </v-btn>
         </nav>
@@ -129,7 +129,7 @@ const technologies = [
     </v-app-bar>
 
     <v-main>
-      <v-row justify="center" align="center" class="mt-6">
+      <v-row justify="center" align="center" class="mt-6 id-row">
         <v-col cols="12" md="5">
           <v-text-field v-model="studentName" label="ID študenta" placeholder="Zadajte svoje ID" />
           <p v-if="errorMessage" class="text-error text-caption mt-n4">
@@ -153,7 +153,7 @@ const technologies = [
       <v-progress-linear v-if="isLoading" indeterminate color="primary" class="mb-4" />
 
       <v-container id="tasks">
-        <v-row justify="center" class="mt-2">
+        <v-row justify="center" class="mt-2 action-row">
           <v-btn color="secondary" @click="showAddDialog = true">
             <v-icon start>mdi-plus</v-icon>
             Pridať úlohu
@@ -165,7 +165,7 @@ const technologies = [
           </v-btn>
         </v-row>
 
-        <v-row justify="center" align="center" class="mt-6">
+        <v-row justify="center" align="center" class="mt-6 filters-row">
           <v-col cols="12" md="5">
             <v-text-field
               v-model="searchQuery"
@@ -190,7 +190,7 @@ const technologies = [
           </v-col>
         </v-row>
 
-        <v-row justify="center" align="center" class="mt-6">
+        <v-row justify="center" align="center" class="mt-6 status-row">
           <v-btn-toggle
             v-model="taskFilter"
             color="secondary"
