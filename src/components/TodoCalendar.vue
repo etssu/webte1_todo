@@ -22,26 +22,26 @@ const emit = defineEmits(['edit-task', 'create-task']);
 const calendarRef = ref(null);
 
 watch(
-    () => props.tasks,
-    (newTasks) => {
-        const calendar = calendarRef.value?.getApi();
+  () => props.tasks,
+  (newTasks) => {
+    const calendar = calendarRef.value?.getApi();
 
-        if (!calendar) return;
+    if (!calendar) return;
 
-        calendar.removeAllEvents();
-        calendar.addEventSource(
-            newTasks.map(task => ({
-                id: String(task.id),
-                title: task.title,
-                start: task.date_from,
-                end: task.date_to,
-                extendedProps: {
-                    task: task
-                }
-            }))
-        );
-    },
-    { deep: true }
+    calendar.removeAllEvents();
+    calendar.addEventSource(
+      newTasks.map((task) => ({
+        id: String(task.id),
+        title: task.title,
+        start: task.date_from,
+        end: task.date_to,
+        extendedProps: {
+          task: task,
+        },
+      }))
+    );
+  },
+  { deep: true }
 );
 
 const calendarOptions = computed(() => ({
@@ -108,15 +108,15 @@ const events = computed(() => {
 
 <template>
   <div class="calendar-legend">
-    <div class="legend-item">
-      <span class="legend-color pending"></span>
-      <span>Nedokončené</span>
-    </div>
+    <span>
+      <span class="legend-color unfinished"></span>
+      Nedokončené
+    </span>
 
-    <div class="legend-item">
+    <span>
       <span class="legend-color finished"></span>
-      <span>Dokončené</span>
-    </div>
+      Dokončené
+    </span>
   </div>
 
   <div class="calendar-container">
@@ -126,38 +126,41 @@ const events = computed(() => {
 
 <style>
 .calendar-legend {
-  display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
 }
 
-.legend-item {
-  display: flex;
+.calendar-legend span {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: #344966;
 }
 
 .legend-color {
-  width: 13px;
-  height: 13px;
-  border-radius: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.unfinished {
+  background-color: #b392ac;
+}
+
+.finished {
+  background-color: #735d78;
 }
 
 .calendar-container .fc-event.task-pending,
 .calendar-container .fc-event.task-pending .fc-event-main {
   background-color: #b392ac !important;
   border-color: #b392ac !important;
-  color: #344966 !important;
 }
 
 .calendar-container .fc-event.task-finished,
 .calendar-container .fc-event.task-finished .fc-event-main {
   background-color: #735d78 !important;
   border-color: #735d78 !important;
-  color: #344966 !important;
 }
 </style>

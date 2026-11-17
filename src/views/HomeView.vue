@@ -26,6 +26,7 @@ const {
   taskFilter,
 
   // dialogs
+  openAddDialog,
   showAddDialog,
   showEditDialog,
   showDeleteDialog,
@@ -91,7 +92,7 @@ const {
 
       <v-container id="tasks">
         <v-row justify="center" class="mt-2 action-row">
-          <v-btn color="secondary" @click="showAddDialog = true">
+          <v-btn color="secondary" @click="openAddDialog">
             <v-icon start>mdi-plus</v-icon>
             Pridať úlohu
           </v-btn>

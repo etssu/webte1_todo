@@ -24,7 +24,7 @@
        <RouterView />
     </v-main>
 
-    <v-footer class="app-footer">
+    <v-footer color="primary" class="app-footer">
       <v-container>
         <v-row align="center" justify="space-between">
           <v-col cols="12" md="6" class="text-center text-md-left">

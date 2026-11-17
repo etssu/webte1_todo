@@ -140,6 +140,11 @@ function clearTaskForm() {
     dateTo.value = '';
 }
 
+function openAddDialog() {
+    clearTaskForm();
+    showAddDialog.value = true;
+}
+
 async function createTask(task) {
     try {
         await addTask(studentName.value.trim(), task);
@@ -498,6 +503,7 @@ export function useTasks() {
         taskFilter,
 
         // Dialogs
+        openAddDialog,
         showAddDialog,
         showEditDialog,
         showDeleteDialog,
