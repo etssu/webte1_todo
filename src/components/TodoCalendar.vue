@@ -1,25 +1,48 @@
-
 <script setup>
-import { computed } from 'vue'
-import FullCalendar from '@fullcalendar/vue3'
+import { computed, watch, ref } from 'vue';
+import FullCalendar from '@fullcalendar/vue3';
 
-import dayGridPlugin from '@fullcalendar/vue3/daygrid'
-import timeGridPlugin from '@fullcalendar/vue3/timegrid'
-import interactionPlugin from '@fullcalendar/vue3/interaction'
+import dayGridPlugin from '@fullcalendar/vue3/daygrid';
+import timeGridPlugin from '@fullcalendar/vue3/timegrid';
+import interactionPlugin from '@fullcalendar/vue3/interaction';
 
-import classicThemePlugin from '@fullcalendar/vue3/themes/classic'
+import classicThemePlugin from '@fullcalendar/vue3/themes/classic';
 
-import '@fullcalendar/vue3/skeleton.css'
-import '@fullcalendar/vue3/themes/classic/theme.css'
-import '@fullcalendar/vue3/themes/classic/palette.css'
+import '@fullcalendar/vue3/skeleton.css';
+import '@fullcalendar/vue3/themes/classic/theme.css';
+import '@fullcalendar/vue3/themes/classic/palette.css';
 const props = defineProps({
-    tasks: {
-        type: Array,
-        required: true
-    }
+  tasks: {
+    type: Array,
+    required: true,
+  },
 });
 
 const emit = defineEmits(['edit-task', 'create-task']);
+const calendarRef = ref(null);
+
+watch(
+    () => props.tasks,
+    (newTasks) => {
+        const calendar = calendarRef.value?.getApi();
+
+        if (!calendar) return;
+
+        calendar.removeAllEvents();
+        calendar.addEventSource(
+            newTasks.map(task => ({
+                id: String(task.id),
+                title: task.title,
+                start: task.date_from,
+                end: task.date_to,
+                extendedProps: {
+                    task: task
+                }
+            }))
+        );
+    },
+    { deep: true }
+);
 
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, classicThemePlugin],
@@ -27,7 +50,7 @@ const calendarOptions = computed(() => ({
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    right: 'dayGridMonth,timeGridWeek,timeGridDay',
   },
   selectable: true,
   nowIndicator: true,
@@ -38,111 +61,103 @@ const calendarOptions = computed(() => ({
   height: 'auto',
   events: events.value,
   eventClick: (info) => {
-    const task = info.event.extendedProps.task
-    emit('edit-task', task)
+    const task = info.event.extendedProps.task;
+    emit('edit-task', task);
   },
   select: (info) => {
     emit('create-task', {
       start: info.start,
-      end: info.end
-    })
+      end: info.end,
+    });
   },
-  // set colors to calendar tasks
   eventDidMount: (info) => {
     const isFinished = info.event.extendedProps.task.is_finished;
+    const color = isFinished ? '#735D78' : '#B392AC';
 
-    info.el.style.setProperty(
-        'background-color',
-        isFinished ? '#735D78' : '#B392AC',
-        'important'
-    );
+    info.el.style.setProperty('background-color', color, 'important');
+    info.el.style.setProperty('border-color', color, 'important');
+    info.el.style.setProperty('color', '#344966', 'important');
 
-    info.el.style.setProperty(
-        'border-color',
-        isFinished ? '#735D78' : '#B392AC',
-        'important'
-    );
-
-    info.el.style.setProperty('color', 'white', 'important');
+    info.el.querySelectorAll('*').forEach((element) => {
+      element.style.setProperty('color', 'white', 'important');
+    });
   },
 }));
 
 const events = computed(() => {
-    return props.tasks.map(task => {
-        return {
-            id: String(task.id),
-            title: task.title,
-            start: task.date_from,
-            end: task.date_to,
-            classNames: [
-                task.is_finished ? 'task-finished' : 'task-pending'
-            ],
-            extendedProps: {
-                task: task
-            }
-        };
-    });
-});
+  return props.tasks.map((task) => {
+    const color = task.is_finished ? '#735D78' : '#B392AC';
 
+    return {
+      id: String(task.id),
+      title: task.title,
+      start: task.date_from,
+      end: task.date_to,
+
+      backgroundColor: color,
+      borderColor: color,
+      textColor: '#344966',
+
+      extendedProps: {
+        task: task,
+      },
+    };
+  });
+});
 </script>
 
 <template>
-    <div class="calendar-legend">
-      <div class="legend-item">
-          <span class="legend-color pending"></span>
-          <span>Nedokončené</span>
-      </div>
-
-      <div class="legend-item">
-          <span class="legend-color finished"></span>
-          <span>Dokončené</span>
-      </div>
+  <div class="calendar-legend">
+    <div class="legend-item">
+      <span class="legend-color pending"></span>
+      <span>Nedokončené</span>
     </div>
 
-    <div class="calendar-container">
-        <FullCalendar :options="calendarOptions" />
+    <div class="legend-item">
+      <span class="legend-color finished"></span>
+      <span>Dokončené</span>
     </div>
+  </div>
+
+  <div class="calendar-container">
+    <FullCalendar ref="calendarRef" :options="calendarOptions" />
+  </div>
 </template>
 
 <style>
 .calendar-legend {
-    display: flex;
-    justify-content: flex-end;
-    gap: 20px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #344966;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #344966;
 }
 
 .legend-color {
-    width: 13px;
-    height: 13px;
-    border-radius: 4px;
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
 }
 
-.legend-color.pending {
-    background-color: #B392AC;
+.calendar-container .fc-event.task-pending,
+.calendar-container .fc-event.task-pending .fc-event-main {
+  background-color: #b392ac !important;
+  border-color: #b392ac !important;
+  color: #344966 !important;
 }
 
-.legend-color.finished {
-    background-color: #735D78;
+.calendar-container .fc-event.task-finished,
+.calendar-container .fc-event.task-finished .fc-event-main {
+  background-color: #735d78 !important;
+  border-color: #735d78 !important;
+  color: #344966 !important;
 }
-  .calendar-container .task-pending {
-      background-color: #B392AC !important;
-      border-color: #B392AC !important;
-      color: white !important;
-  }
-
-  .calendar-container .task-finished {
-      background-color: #735D78 !important;
-      border-color: #735D78 !important;
-      color: white !important;
-  }
 </style>

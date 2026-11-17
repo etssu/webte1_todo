@@ -29,8 +29,6 @@ const technologies = [
 
 <template>
   <v-container id="about" class="about-section py-12">
-    <v-divider class="mb-10" />
-
     <div class="text-center mb-10">
       <h2 class="about-title mb-3">O projekte</h2>
       <p class="text-body-1 text-medium-emphasis">
